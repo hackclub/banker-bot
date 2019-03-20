@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "start": "node index.js"
+  },
   "main": "index.js",
   "dependencies": {
     "botkit": "0.7.4",
