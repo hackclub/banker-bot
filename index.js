@@ -2,7 +2,7 @@ var Botkit = require('botkit')
 var Airtable = require('airtable')
 var _ = require('lodash')
 
-var base = new Airtable({apiKey: process.env.airtableKey}).base('appoT5c4DZOA5hvHc');
+var base = new Airtable({apiKey: process.env.AIRTABLE_KEY}).base(AIRTABLE_BASE);
 
 var redisConfig = {
   url: process.env.REDISCLOUD_URL
@@ -68,9 +68,9 @@ function getBalance(user, cb = () => {}) {
 console.log("Booting banker bot")
 
 var controller = Botkit.slackbot({
-  clientId: process.env.clientId,
-  clientSecret: process.env.clientSecret,
-  clientSigningSecret: process.env.clientSigningSecret,
+  clientId: process.env.SLACK_CLIENT_ID,
+  clientSecret: process.env.SLACK_CLIENT_SECRET,
+  clientSigningSecret: process.env.SLACK_CLIENT_SIGNING_SECRET,
   scopes: ['bot', 'chat:write:bot'],
   storage: redisStorage
 });
@@ -95,7 +95,6 @@ function matchData(str, pattern, keys, obj = {}) {
 }
 
 var bot = controller.spawn({
-    token: process.env.slackToken
 });
 
 bot.say({
