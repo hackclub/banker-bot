@@ -151,5 +151,7 @@ controller.hears(givePattern.source, 'direct_mention,direct_message', (bot, mess
 
 controller.hears('.*', 'direct_mention,direct_message', (bot, message) => {
   var {text, user} = message
-  console.log(`Received unhandled message from User ${user}:\n${message.text}`)
+  console.log(`Received unhandled message from User ${user}:\n${text}`)
+
+  bot.replyInThread(message, 'Pardon me, but I do not understand.')
 })
