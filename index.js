@@ -112,7 +112,10 @@ controller.hears(balancePattern.source, 'direct_mention,direct_message', (bot, m
   var target = captures[1] || user
   console.log(`Received balance request from User ${user} for User ${target}`)
   getBalance(target, (balance) => {
-    bot.replyInThread(message, `User ${target} has a balance of ${balance}`)
+    var reply = user == target ?
+      `You have ${balance}gp in your account, sirrah.` :
+      `Ah yes, User ${target}—they have ${balance}gp.`
+    bot.replyInThread(message, reply)
   })
 })
 
@@ -133,7 +136,7 @@ controller.hears(givePattern.source, 'direct_mention,direct_message', (bot, mess
     getBalance(user, (userBalance, userRecord) => {
       if (userBalance < amount) {
         console.log(`User has insufficient funds`)
-        bot.replyInThread(message, `You only have ${userBalance}gp`)
+        bot.replyInThread(message, `Regrettably, you only have ${userBalance}gp in your account.`)
       }
       else {
         getBalance(target, (targetBalance, targetRecord) => {
@@ -141,7 +144,7 @@ controller.hears(givePattern.source, 'direct_mention,direct_message', (bot, mess
           // Treats targetBalance+amount as a string concatenation. WHY???
           setBalance(targetRecord.id, targetBalance-(-amount))
           
-          bot.replyInThread(message, `Giving ${amount}gp from ${user} to ${target}`)
+          bot.replyInThread(message, `I shall transfer ${amount}gp to ${target} immediately.`)
         })
       }
     })
