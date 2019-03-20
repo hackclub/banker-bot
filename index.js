@@ -2,11 +2,16 @@ var Botkit = require('botkit')
 var Airtable = require('airtable')
 var _ = require('lodash')
 
-var startBalance = 100
-
 var base = new Airtable({apiKey: process.env.airtableKey}).base('appoT5c4DZOA5hvHc');
 
-base('Balances')
+var redisConfig = {
+  url: process.env.REDISCLOUD_URL
+}
+var redisStorage = require('botkit-storage-redis')(redisConfig)
+
+var startBalance = 100
+
+console.log("Booting bank bot")
 
 function createBalance(user, cb = () => {}) {
   console.log(`Creating balance for User ${user}`)
@@ -67,9 +72,10 @@ var controller = Botkit.slackbot({
   clientSecret: process.env.clientSecret,
   clientSigningSecret: process.env.clientSigningSecret,
   scopes: ['bot', 'chat:write:bot'],
+  storage: redisStorage
 });
 
-controller.setupWebserver(process.env.port,function(err,webserver) {
+controller.setupWebserver(process.env.PORT, function(err,webserver) {
     controller.createWebhookEndpoints(controller.webserver)
     controller.createOauthEndpoints(controller.webserver)
 });
