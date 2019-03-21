@@ -122,7 +122,7 @@ controller.hears(balancePattern.source, 'direct_mention,direct_message', (bot, m
 var givePattern = /give\s+<@([A-z|0-9]+)>\s+([0-9]+)/i
 controller.hears(givePattern.source, 'direct_mention,direct_message', (bot, message) => {
   // console.log(message)
-  var {text, user} = message
+  var {text, user, event} = message
 
   console.log(`Processing give request from ${user}`)
 
@@ -144,10 +144,17 @@ controller.hears(givePattern.source, 'direct_mention,direct_message', (bot, mess
           setBalance(targetRecord.id, targetBalance-(-amount))
           
           bot.replyInThread(message, `I shall transfer ${amount}gp to ${target} immediately.`)
+
+          if (event['channel_type'] == 'im') {
+            bot.say({
+              user: '@'+target,
+              channel: '@'+target,
+              text: `Good morrow sirrah. ${user} has just transferred ${amount}gp to your account.`
+            })
+          }
         })
       }
     })
-
   }
 })
 
@@ -157,6 +164,6 @@ controller.hears('.*', 'direct_mention,direct_message', (bot, message) => {
 
   // Ignore if reply is in a thread. Hack to work around infinite bot loops.
   if (_.has(message.event, 'parent_user_id')) return
-  
+
   bot.replyInThread(message, 'Pardon me, but I do not understand.')
 })
