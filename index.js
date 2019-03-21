@@ -155,5 +155,8 @@ controller.hears('.*', 'direct_mention,direct_message', (bot, message) => {
   var {text, user} = message
   console.log(`Received unhandled message from User ${user}:\n${text}`)
 
+  // Ignore if reply is in a thread. Hack to work around infinite bot loops.
+  if (_.has(message.event, 'parent_user_id')) return
+  
   bot.replyInThread(message, 'Pardon me, but I do not understand.')
 })
