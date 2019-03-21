@@ -113,7 +113,7 @@ controller.hears(balancePattern.source, 'direct_mention,direct_message', (bot, m
   getBalance(target, (balance) => {
     var reply = user == target ?
       `You have ${balance}gp in your account, sirrah.` :
-      `Ah yes, User ${target}—they have ${balance}gp.`
+      `Ah yes, User <@${user}> (${target})—they have ${balance}gp.`
     bot.replyInThread(message, reply)
   })
 })
@@ -149,7 +149,7 @@ controller.hears(givePattern.source, 'direct_mention,direct_message', (bot, mess
             bot.say({
               user: '@'+target,
               channel: '@'+target,
-              text: `Good morrow sirrah. ${user} has just transferred ${amount}gp to your account.`
+              text: `Good morrow sirrah. <@${user}> has just transferred ${amount}gp to your account.`
             })
           }
         })
