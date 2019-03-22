@@ -113,7 +113,7 @@ controller.hears(balancePattern.source, 'direct_mention,direct_message', (bot, m
   getBalance(target, (balance) => {
     var reply = user == target ?
       `You have ${balance}gp in your account, sirrah.` :
-      `Ah yes, User <@${user}> (${target})—they have ${balance}gp.`
+      `Ah yes, User <@${target}> (${target})—they have ${balance}gp.`
     bot.replyInThread(message, reply)
   })
 })
