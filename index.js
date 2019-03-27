@@ -16,7 +16,7 @@ console.log("Booting bank bot")
 function createBalance(user, cb = () => {}) {
   console.log(`Creating balance for User ${user}`)
   
-  base('Balances').create({
+  base('bank').create({
     "User": user,
     "Balance": startBalance
   }, function(err, record) {
@@ -30,7 +30,7 @@ function createBalance(user, cb = () => {}) {
 function setBalance(id, balance, cb = () => {}) {
   console.log(`Setting balance for Record ${id} to ${balance}`)
 
-  base('Balances').update(id, {
+  base('bank').update(id, {
     "Balance": balance
   }, function(err, record) {
     if (err) { console.error(err); return; }
@@ -42,7 +42,7 @@ function setBalance(id, balance, cb = () => {}) {
 function getBalance(user, cb = () => {}) {
   console.log(`Retrieving balance for User ${user}`)
 
-  base('Balances').select({
+  base('bank').select({
     filterByFormula: `User = "${user}"`
   }).firstPage(function page(err, records) {
     if (err) {
