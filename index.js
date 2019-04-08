@@ -167,6 +167,7 @@ controller.hears(givePattern.source, 'direct_mention,direct_message', (bot, mess
 controller.on('slash_command', (bot, message) => {
   const {command, text, user_id} = message
   console.log(`Slash command received from ${user_id}: ${text}`)
+  console.log(message)
 
   if (command == 'give') {
     const pattern = /<@([A-z|0-9]+)>\s+([0-9]+)/
