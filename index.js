@@ -169,8 +169,8 @@ controller.on('slash_command', (bot, message) => {
   console.log(`Slash command received from ${user_id}: ${text}`)
   console.log(message)
 
-  if (command == 'give') {
-    const pattern = /<@([A-z|0-9]+)>\s+([0-9]+)/
+  if (command == '/give') {
+    const pattern = /<@([A-z|0-9]+)\|\w+>\s+([0-9]+)/
     const match = pattern.exec(text)
     if (match) {
       const target = match[1]
