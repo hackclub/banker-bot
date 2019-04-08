@@ -118,12 +118,12 @@ controller.hears(balancePattern.source, 'direct_mention,direct_message', (bot, m
   })
 })
 
-const transfer = (bot, message, channelType, user, target, amount) => {
+const transfer = (bot, channelType, user, target, amount, replyCallback) => {
 
   getBalance(user, (userBalance, userRecord) => {
     if (userBalance < amount) {
       console.log(`User has insufficient funds`)
-      bot.replyInThread(message, `Regrettably, you only have ${userBalance}gp in your account.`)
+      replyCallback(`Regrettably, you only have ${userBalance}gp in your account.`)
     }
     else {
       getBalance(target, (targetBalance, targetRecord) => {
@@ -131,7 +131,7 @@ const transfer = (bot, message, channelType, user, target, amount) => {
         // Treats targetBalance+amount as a string concatenation. WHY???
         setBalance(targetRecord.id, targetBalance-(-amount))
         
-        bot.replyInThread(message, `I shall transfer ${amount}gp to ${target} immediately.`)
+        replyCallback(`I shall transfer ${amount}gp to ${target} immediately.`)
 
         if (channelType == 'im') {
           bot.say({
@@ -159,8 +159,9 @@ controller.hears(givePattern.source, 'direct_mention,direct_message', (bot, mess
 
   if (args) {
     var {target, amount} = args
+    const replyCallback = text => bot.replyInThread(message, text)
 
-    transfer(bot, message, event['channel_type'], user, target, amount)
+    transfer(bot, event['channel_type'], user, target, amount, replyCallback)
   }
 })
 
@@ -176,9 +177,9 @@ controller.on('slash_command', (bot, message) => {
       const target = match[1]
       const amount = match[2]
 
-      bot.replyPublic(message, `You would like ${amount}gp transferred to <@${target}>? I shall look into it immediately, <@${user_id}>.`)
+      const replyCallback = text => bot.replyPublic(message, `Thank you for your patronage, <@${user_id}>. ${text}`)
 
-      transfer(bot, message, 'public', user_id, target, amount)
+      transfer(bot, 'public', user_id, target, amount, replyCallback)
     }
   }
 })
