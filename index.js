@@ -176,6 +176,8 @@ controller.on('slash_command', (bot, message) => {
       const target = match[1]
       const amount = match[2]
 
+      bot.replyPublic(message, `You would like ${amount}gp transferred to <@${target}>? I shall look into it immediately, <@${user_id}>.`)
+
       transfer(bot, message, 'public', user_id, target, amount)
     }
   }
