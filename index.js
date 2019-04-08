@@ -118,7 +118,7 @@ controller.hears(balancePattern.source, 'direct_mention,direct_message', (bot, m
   })
 })
 
-const transfer = (message, user, target, amount) => {
+const transfer = (message, channelType, user, target, amount) => {
 
   getBalance(user, (userBalance, userRecord) => {
     if (userBalance < amount) {
@@ -133,7 +133,7 @@ const transfer = (message, user, target, amount) => {
         
         bot.replyInThread(message, `I shall transfer ${amount}gp to ${target} immediately.`)
 
-        if (event['channel_type'] == 'im') {
+        if (channelType == 'im') {
           bot.say({
             user: '@'+target,
             channel: '@'+target,
@@ -160,7 +160,7 @@ controller.hears(givePattern.source, 'direct_mention,direct_message', (bot, mess
   if (args) {
     var {target, amount} = args
 
-    transfer(message, user, target, amount)
+    transfer(message, event['channel_type'], user, target, amount)
   }
 })
 
@@ -175,7 +175,7 @@ controller.on('slash_command', (bot, message) => {
       const target = match[1]
       const amount = match[2]
 
-      transfer(message, user_id, target, amount)
+      transfer(message, 'public', user_id, target, amount)
     }
   }
 })
