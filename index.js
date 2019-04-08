@@ -162,6 +162,21 @@ controller.hears(givePattern.source, 'direct_mention,direct_message', (bot, mess
 
     transfer(message, user, target, amount)
   }
+})
+
+controller.on('slash_command', (bot, message) => {
+  const {command, text, user_id} = message
+  console.log(`Slash command received from ${user_id}: ${text}`)
+
+  if (command == 'give') {
+    const pattern = /<@([A-z|0-9]+)>\s+([0-9]+)/
+    const match = pattern.exec(text)
+    if (match) {
+      const target = match[1]
+      const amount = match[2]
+
+      transfer(message, user_id, target, amount)
+    }
   }
 })
 
