@@ -119,6 +119,11 @@ controller.hears(balancePattern.source, 'direct_mention,direct_message', (bot, m
 })
 
 const transfer = (bot, channelType, user, target, amount, replyCallback) => {
+  if (user == target) {
+    console.log(`${user} attempting to transfer to theirself`)
+    replyCallback(`What are you trying to pull here, <@${user}>?`)
+    return
+  }
 
   getBalance(user, (userBalance, userRecord) => {
     if (userBalance < amount) {
@@ -177,7 +182,7 @@ controller.on('slash_command', (bot, message) => {
       const target = match[1]
       const amount = match[2]
 
-      const replyCallback = text => bot.replyPublic(message, `Thank you for your patronage, <@${user_id}>. ${text}`)
+      const replyCallback = text => bot.replyPublic(message, text)
 
       transfer(bot, 'public', user_id, target, amount, replyCallback)
     }
