@@ -118,7 +118,7 @@ controller.hears(balancePattern.source, 'direct_mention,direct_message', (bot, m
   })
 })
 
-const transfer = (message, channelType, user, target, amount) => {
+const transfer = (bot, message, channelType, user, target, amount) => {
 
   getBalance(user, (userBalance, userRecord) => {
     if (userBalance < amount) {
@@ -160,7 +160,7 @@ controller.hears(givePattern.source, 'direct_mention,direct_message', (bot, mess
   if (args) {
     var {target, amount} = args
 
-    transfer(message, event['channel_type'], user, target, amount)
+    transfer(bot, message, event['channel_type'], user, target, amount)
   }
 })
 
@@ -175,7 +175,7 @@ controller.on('slash_command', (bot, message) => {
       const target = match[1]
       const amount = match[2]
 
-      transfer(message, 'public', user_id, target, amount)
+      transfer(bot, message, 'public', user_id, target, amount)
     }
   }
 })
