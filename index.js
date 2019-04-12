@@ -181,7 +181,7 @@ controller.on('slash_command', (bot, message) => {
   }
 
   if (command == '/balance') {
-    var pattern = /\/balance(?:\s+<@([A-z|0-9]+)>)?/i
+    var pattern = /\/balance(?:\s+<@([A-z|0-9]+)\|\w+>)?/i
     var match = pattern.exec(text)
     if (match) {
       var target = match[1]
