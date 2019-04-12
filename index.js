@@ -184,10 +184,6 @@ controller.on('slash_command', (bot, message) => {
     var pattern = /\/balance(?:\s+<@([A-z|0-9]+)\|\w+>)?/i
     var match = pattern.exec(text)
     if (match) {
-      var target = match[1]
-      var amount = match[2]
-      var note = match[3] || ''
-
       var captures = balancePattern.exec(text)
       var target = captures[1] || user
       console.log(`Received balance request from User ${user} for User ${target}`)
