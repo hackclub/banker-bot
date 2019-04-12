@@ -130,7 +130,7 @@ var transfer = (bot, channelType, user, target, amount, note, replyCallback) => 
 
         var replyNote = !note.length ? '.' : ` for "${note}"`
         
-        replyCallback(`I shall transfer ${amount}gp to ${target} immediately${replyNote}`)
+        replyCallback(`I shall transfer ${amount}gp to <@${target}> immediately${replyNote}`)
 
         if (channelType == 'im') {
           bot.say({
@@ -177,6 +177,26 @@ controller.on('slash_command', (bot, message) => {
       var replyCallback = text => bot.replyPublic(message, text)
 
       transfer(bot, 'public', user_id, target, amount, note, replyCallback)
+    }
+  }
+
+  if (command == '/balance') {
+    var pattern = /\/balance(?:\s+<@([A-z|0-9]+)>)?/i
+    var match = pattern.exec(text)
+    if (match) {
+      var target = match[1]
+      var amount = match[2]
+      var note = match[3] || ''
+
+      var captures = balancePattern.exec(text)
+      var target = captures[1] || user
+      console.log(`Received balance request from User ${user} for User ${target}`)
+      getBalance(target, (balance) => {
+        var reply = user == target ?
+          `You have ${balance}gp in your account, sirrah.` :
+          `Ah yes, User <@${target}> (${target})—they have ${balance}gp.`
+        bot.replyPublic(message, reply)
+      })
     }
   }
 })
