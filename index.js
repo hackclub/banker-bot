@@ -118,7 +118,7 @@ controller.hears(balancePattern.source, 'direct_mention,direct_message', (bot, m
   })
 })
 
-const transfer = (bot, channelType, user, target, amount, note, replyCallback) => {
+var transfer = (bot, channelType, user, target, amount, note, replyCallback) => {
   if (user == target) {
     console.log(`${user} attempting to transfer to theirself`)
     replyCallback(`What are you trying to pull here, <@${user}>?`)
@@ -136,7 +136,7 @@ const transfer = (bot, channelType, user, target, amount, note, replyCallback) =
         // Treats targetBalance+amount as a string concatenation. WHY???
         setBalance(targetRecord.id, targetBalance-(-amount))
 
-        const replyNote = !note.length ? '.' : ` for "${note}"`
+        var replyNote = !note.length ? '.' : ` for "${note}"`
         
         replyCallback(`I shall transfer ${amount}gp to ${target} immediately${replyNote}`)
 
@@ -166,26 +166,26 @@ controller.hears(/give\s+<@([A-z|0-9]+)>\s+([0-9]+)(?:\s+for\s+(.+))?/i, 'direct
   var target = message.match[1]
   var amount = message.match[2]
   var note = message.match[3]
-  
-  const replyCallback = text => bot.replyInThread(message, text)
+
+  var replyCallback = text => bot.replyInThread(message, text)
 
   transfer(bot, event['channel_type'], user, target, amount, note, replyCallback)
 })
 
 controller.on('slash_command', (bot, message) => {
-  const {command, text, user_id} = message
+  var {command, text, user_id} = message
   console.log(`Slash command received from ${user_id}: ${text}`)
   console.log(message)
 
   if (command == '/give') {
-    const pattern = /<@([A-z|0-9]+)\|\w+>\s+([0-9]+)(?:\s+for\s+(.+))?/
-    const match = pattern.exec(text)
+    var pattern = /<@([A-z|0-9]+)\|\w+>\s+([0-9]+)(?:\s+for\s+(.+))?/
+    var match = pattern.exec(text)
     if (match) {
-      const target = match[1]
-      const amount = match[2]
-      const note = match[3]
+      var target = match[1]
+      var amount = match[2]
+      var note = match[3]
 
-      const replyCallback = text => bot.replyPublic(message, text)
+      var replyCallback = text => bot.replyPublic(message, text)
 
       transfer(bot, 'public', user_id, target, amount, note, replyCallback)
     }
