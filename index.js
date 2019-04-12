@@ -154,7 +154,7 @@ var transfer = (bot, channelType, user, target, amount, note, replyCallback) => 
 }
 
 // @bot give @zrl 100 --> Gives 100gp from my account to zrl's
-controller.hears(/give\s+<@([A-z|0-9]+)>\s+([0-9]+)(?:\s+for\s+(.+))?/i, 'direct_mention,direct_message', (bot, message) => {
+controller.hears(/give\s+<@([A-z|0-9]+)>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/i, 'direct_mention,direct_message', (bot, message) => {
   // console.log(message)
   var {text, user, event} = message
 
@@ -175,7 +175,7 @@ controller.on('slash_command', (bot, message) => {
   console.log(message)
 
   if (command == '/give') {
-    var pattern = /<@([A-z|0-9]+)\|\w+>\s+([0-9]+)(?:\s+for\s+(.+))?/
+    var pattern = /<@([A-z|0-9]+)\|\w+>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/
     var match = pattern.exec(text)
     if (match) {
       var target = match[1]
