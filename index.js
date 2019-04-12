@@ -181,12 +181,11 @@ controller.on('slash_command', (bot, message) => {
   }
 
   if (command == '/balance') {
-    console.log(`Command is balance`)
     var pattern = /(?:\s+<@([A-z|0-9]+)\|\w+>)?/i
     var match = pattern.exec(text)
     if (match) {
       var target = match[1] || user_id
-      console.log(`Received balance request from User ${user} for User ${target}`)
+      console.log(`Received balance request from User ${user_id} for User ${target}`)
       getBalance(target, (balance) => {
         var reply = user == target ?
           `You have ${balance}gp in your account, sirrah.` :
