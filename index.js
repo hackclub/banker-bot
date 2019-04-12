@@ -94,14 +94,6 @@ function matchData(str, pattern, keys, obj = {}) {
   return null
 }
 
-var bot = controller.spawn({
-});
-
-bot.say({
-  text: 'Awake',
-  channel: '@UDK5M9Y13'
-});
-
 // @bot balance --> Returns my balance
 // @bot balance @zrl --> Returns zrl's balance
 var balancePattern = /^balance(?:\s+<@([A-z|0-9]+)>)?/i
