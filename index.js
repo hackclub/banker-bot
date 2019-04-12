@@ -160,9 +160,6 @@ controller.hears(/give\s+<@([A-z|0-9]+)>\s+([0-9]+)(?:\s+for\s+(.+))?/i, 'direct
 
   console.log(`Processing give request from ${user}`)
 
-  var keys = ['target', 'amount']
-  var args = matchData(text, givePattern, keys)
-  
   var target = message.match[1]
   var amount = message.match[2]
   var note = message.match[3]
