@@ -162,7 +162,7 @@ controller.hears(/give\s+<@([A-z|0-9]+)>\s+([0-9]+)(?:\s+for\s+(.+))?/i, 'direct
 
   var target = message.match[1]
   var amount = message.match[2]
-  var note = message.match[3]
+  var note = message.match[3] || ''
 
   var replyCallback = text => bot.replyInThread(message, text)
 
@@ -180,7 +180,7 @@ controller.on('slash_command', (bot, message) => {
     if (match) {
       var target = match[1]
       var amount = match[2]
-      var note = match[3]
+      var note = match[3] || ''
 
       var replyCallback = text => bot.replyPublic(message, text)
 
