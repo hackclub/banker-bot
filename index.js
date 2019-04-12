@@ -185,7 +185,7 @@ controller.on('slash_command', (bot, message) => {
     var match = pattern.exec(text)
     if (match) {
       var captures = balancePattern.exec(text)
-      var target = captures[1] || user
+      var target = captures[1] || user_id
       console.log(`Received balance request from User ${user} for User ${target}`)
       getBalance(target, (balance) => {
         var reply = user == target ?
