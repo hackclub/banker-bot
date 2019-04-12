@@ -118,7 +118,7 @@ controller.hears(balancePattern.source, 'direct_mention,direct_message', (bot, m
   })
 })
 
-const transfer = (bot, channelType, user, target, amount, replyCallback) => {
+const transfer = (bot, channelType, user, target, amount, note, replyCallback) => {
   if (user == target) {
     console.log(`${user} attempting to transfer to theirself`)
     replyCallback(`What are you trying to pull here, <@${user}>?`)
@@ -135,14 +135,16 @@ const transfer = (bot, channelType, user, target, amount, replyCallback) => {
         setBalance(userRecord.id, userBalance-amount)
         // Treats targetBalance+amount as a string concatenation. WHY???
         setBalance(targetRecord.id, targetBalance-(-amount))
+
+        const replyNote = !note.length ? '.' : ` for "${note}"`
         
-        replyCallback(`I shall transfer ${amount}gp to ${target} immediately.`)
+        replyCallback(`I shall transfer ${amount}gp to ${target} immediately${replyNote}`)
 
         if (channelType == 'im') {
           bot.say({
             user: '@'+target,
             channel: '@'+target,
-            text: `Good morrow sirrah. <@${user}> has just transferred ${amount}gp to your account.`
+            text: `Good morrow sirrah. <@${user}> has just transferred ${amount}gp to your account${replyNote}`
           })
         }
       })
@@ -152,8 +154,7 @@ const transfer = (bot, channelType, user, target, amount, replyCallback) => {
 }
 
 // @bot give @zrl 100 --> Gives 100gp from my account to zrl's
-var givePattern = /give\s+<@([A-z|0-9]+)>\s+([0-9]+)/i
-controller.hears(givePattern.source, 'direct_mention,direct_message', (bot, message) => {
+controller.hears(/give\s+<@([A-z|0-9]+)>\s+([0-9]+)(?:\s+for\s+(.+))?/i, 'direct_mention,direct_message', (bot, message) => {
   // console.log(message)
   var {text, user, event} = message
 
@@ -161,13 +162,14 @@ controller.hears(givePattern.source, 'direct_mention,direct_message', (bot, mess
 
   var keys = ['target', 'amount']
   var args = matchData(text, givePattern, keys)
+  
+  var target = message.match[1]
+  var amount = message.match[2]
+  var note = message.match[3]
+  
+  const replyCallback = text => bot.replyInThread(message, text)
 
-  if (args) {
-    var {target, amount} = args
-    const replyCallback = text => bot.replyInThread(message, text)
-
-    transfer(bot, event['channel_type'], user, target, amount, replyCallback)
-  }
+  transfer(bot, event['channel_type'], user, target, amount, note, replyCallback)
 })
 
 controller.on('slash_command', (bot, message) => {
@@ -176,15 +178,16 @@ controller.on('slash_command', (bot, message) => {
   console.log(message)
 
   if (command == '/give') {
-    const pattern = /<@([A-z|0-9]+)\|\w+>\s+([0-9]+)/
+    const pattern = /<@([A-z|0-9]+)\|\w+>\s+([0-9]+)(?:\s+for\s+(.+))?/
     const match = pattern.exec(text)
     if (match) {
       const target = match[1]
       const amount = match[2]
+      const note = match[3]
 
       const replyCallback = text => bot.replyPublic(message, text)
 
-      transfer(bot, 'public', user_id, target, amount, replyCallback)
+      transfer(bot, 'public', user_id, target, amount, note, replyCallback)
     }
   }
 })
