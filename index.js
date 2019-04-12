@@ -163,6 +163,7 @@ controller.hears(/give\s+<@([A-z|0-9]+)>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/i, 
 
 controller.on('slash_command', (bot, message) => {
   var {command, text, user_id} = message
+  var user = user_id
   console.log(`Slash command received from ${user_id}: ${text}`)
   console.log(message)
 
@@ -184,8 +185,8 @@ controller.on('slash_command', (bot, message) => {
     var pattern = /(?:\s+<@([A-z|0-9]+)\|\w+>)?/i
     var match = pattern.exec(text)
     if (match) {
-      var target = match[1] || user_id
-      console.log(`Received balance request from User ${user_id} for User ${target}`)
+      var target = match[1] || user
+      console.log(`Received balance request from User ${user} for User ${target}`)
       getBalance(target, (balance) => {
         var reply = user == target ?
           `You have ${balance}gp in your account, sirrah.` :
