@@ -182,7 +182,7 @@ controller.on('slash_command', (bot, message) => {
   }
 
   if (command == '/balance') {
-    var pattern = /(?:\s+<@([A-z|0-9]+)\|\w+>)?/i
+    var pattern = /(?:<@([A-z|0-9]+)\|\w+>)?/i
     var match = pattern.exec(text)
     if (match) {
       var target = match[1] || user
