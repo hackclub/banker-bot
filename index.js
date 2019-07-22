@@ -197,7 +197,7 @@ controller.on('slash_command', (bot, message) => {
   }
 })
 
-controller.hears('.*', 'direct_mention,direct_message,bot_message', (bot, message) => {
+controller.hears('.*', 'direct_mention,direct_message', (bot, message) => {
   var {text, user} = message
   console.log(`Received unhandled message from User ${user}:\n${text}`)
 
