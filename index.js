@@ -23,7 +23,7 @@ function createBalance(user, cb = () => {}) {
       if (err) { console.error(err); return; }
       console.log(`New balance created for User ${user}`)
       // console.log(record)
-      cb(100, record)
+      cb(startBalance, record)
   });
 }
 
