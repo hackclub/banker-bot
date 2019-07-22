@@ -9,7 +9,7 @@ var redisConfig = {
 }
 var redisStorage = require('botkit-storage-redis')(redisConfig)
 
-var startBalance = 100
+var startBalance = 0
 
 console.log("Booting bank bot")
 
