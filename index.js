@@ -97,7 +97,7 @@ function matchData(str, pattern, keys, obj = {}) {
 // @bot balance --> Returns my balance
 // @bot balance @zrl --> Returns zrl's balance
 var balancePattern = /^balance(?:\s+<@([A-z|0-9]+)>)?/i
-controller.hears(balancePattern.source, 'direct_mention,direct_message', (bot, message) => {
+controller.hears(balancePattern.source, 'direct_mention,direct_message,bot_message', (bot, message) => {
   var {text, user} = message
   var captures = balancePattern.exec(text)
   var target = captures[1] || user
