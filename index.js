@@ -137,7 +137,7 @@ var transfer = (bot, channelType, user, target, amount, note, replyCallback) => 
         
         replyCallback(`I shall transfer ${amount}gp to <@${target}> immediately${replyNote}`)
 
-        logTransaction(user, target, amount, note, true, "")
+        var isPrivate = false
 
         if (channelType == 'im') {
           bot.say({
@@ -145,7 +145,11 @@ var transfer = (bot, channelType, user, target, amount, note, replyCallback) => 
             channel: '@'+target,
             text: `Good morrow sirrah. <@${user}> has just transferred ${amount}gp to your account${replyNote}`
           })
+
+          isPrivate = true
         }
+
+        logTransaction(user, target, amount, note, true, "", isPrivate)
       })
     }
   })
@@ -153,8 +157,11 @@ var transfer = (bot, channelType, user, target, amount, note, replyCallback) => 
 }
 
 // log transactions in ledger
-// parameters: user, target, amount, note, success, log message
-function logTransaction(u, t, a, n, s, m) {
+// parameters: user, target, amount, note, success, log message, private
+function logTransaction(u, t, a, n, s, m, p) {
+  if (p === undefined)
+    p = false
+
   base('ledger').create({
     "From": u,
     "To": t,
@@ -162,11 +169,12 @@ function logTransaction(u, t, a, n, s, m) {
     "Note": n,
     "Success": s,
     "Admin Note": m,
-    "Timestamp": Date.now()
+    "Timestamp": Date.now(),
+    "Private": p
   }, function(err, record) {
     if (err) {
-      console.error(err); 
-      return; 
+      console.error(err)
+      return
     }
     console.log("New ledger transaction logged: " + record.getId())
   })
