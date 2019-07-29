@@ -101,7 +101,10 @@ controller.hears(balancePattern.source, 'direct_mention,direct_message,bot_messa
   var {text, user} = message
   var captures = balancePattern.exec(text)
   var target = captures[1] || user
+  
   console.log(`Received balance request from User ${user} for User ${target}`)
+  console.log(message)
+
   getBalance(target, (balance) => {
     var reply = user == target ?
       `You have ${balance}gp in your account, sirrah.` :
@@ -151,6 +154,7 @@ controller.hears(/give\s+<@([A-z|0-9]+)>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/i, 
   var {text, user, event} = message
 
   console.log(`Processing give request from ${user}`)
+  console.log(message)
 
   var target = message.match[1]
   var amount = message.match[2]
