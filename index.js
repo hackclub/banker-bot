@@ -230,7 +230,7 @@ controller.on('slash_command', (bot, message) => {
   console.log(message)
 
   if (command == '/give') {
-    var pattern = /<@([A-z|0-9]+)\|.+>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/
+    var pattern = /<@([A-z|0-9]+)>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/
     var match = pattern.exec(text)
     if (match) {
       var target = match[1]
@@ -244,7 +244,7 @@ controller.on('slash_command', (bot, message) => {
   }
 
   if (command == '/balance') {
-    var pattern = /(?:<@([A-z|0-9]+)\|.+>)?/i
+    var pattern = /(?:<@([A-z|0-9]+)>)?/i
     var match = pattern.exec(text)
     if (match) {
       var target = match[1] || user
