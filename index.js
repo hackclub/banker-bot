@@ -155,9 +155,6 @@ var transfer = (bot, channelType, user, target, amount, note, replyCallback) => 
 
         var isPrivate = false
 
-        console.log("DATA: " + data.bots)
-        console.log("TARGET: " + target)
-
         if (channelType == 'im') {
           bot.say({
             user: '@' + target,
@@ -171,7 +168,7 @@ var transfer = (bot, channelType, user, target, amount, note, replyCallback) => 
           bot.say({
             user: '@' + target,
             channel: '@' + target,
-            text: `<@${user}>,${amount},${replyNote}`
+            text: `<@${user}> | ${amount} | ${replyNote}`
           })
         }
 
