@@ -168,7 +168,7 @@ function logTransaction(u, t, a, n, s, m, p) {
   base('ledger').create({
     "From": u,
     "To": t,
-    "Amount": a,
+    "Amount": parseInt(a),
     "Note": n,
     "Success": s,
     "Admin Note": m,
