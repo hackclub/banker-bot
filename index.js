@@ -165,6 +165,8 @@ function logTransaction(u, t, a, n, s, m, p) {
   if (p === undefined)
     p = false
 
+  console.log(parseInt(a))
+
   base('ledger').create({
     "From": u,
     "To": t,
