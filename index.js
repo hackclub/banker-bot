@@ -226,37 +226,37 @@ controller.on('slash_command', (bot, message) => {
   console.log(message)
 
   if (message.channel_id == process.env.SLACK_SELF_ID) {
-    bot.replyInThread(message, 'Ahoy ahoy. You\'re talking to me already... no need for slash commands to summon me!')
     return
-  } else {
-    if (command == '/give') {
-      var pattern = /<@([A-z|0-9]+)\|.+>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/
-      var match = pattern.exec(text)
-      if (match) {
-        var target = match[1]
-        var amount = match[2]
-        var note = match[3] || ''
+  }
 
-        var replyCallback = text => bot.replyPublic(message, text)
+  if (command == '/give') {
+    var pattern = /<@([A-z|0-9]+)\|.+>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/
+    var match = pattern.exec(text)
+    if (match) {
+      var target = match[1]
+      var amount = match[2]
+      var note = match[3] || ''
 
-        transfer(bot, 'public', user_id, target, amount, note, replyCallback)
-      }
+      var replyCallback = text => bot.replyPublic(message, text)
+
+      transfer(bot, 'public', user_id, target, amount, note, replyCallback)
+    }
+  }
+
+  if (command == '/balance') {
+    var pattern = /(?:<@([A-z|0-9]+)\|.+>)?/i
+    var match = pattern.exec(text)
+    if (match) {
+      var target = match[1] || user
+      console.log(`Received balance request from User ${user} for User ${target}`)
+      getBalance(target, (balance) => {
+        var reply = user == target ?
+          `You have ${balance}gp in your account, sirrah.` :
+          `Ah yes, User <@${target}> (${target})—they have ${balance}gp.`
+        bot.replyPublic(message, reply)
+      })
     }
 
-    if (command == '/balance') {
-      var pattern = /(?:<@([A-z|0-9]+)\|.+>)?/i
-      var match = pattern.exec(text)
-      if (match) {
-        var target = match[1] || user
-        console.log(`Received balance request from User ${user} for User ${target}`)
-        getBalance(target, (balance) => {
-          var reply = user == target ?
-            `You have ${balance}gp in your account, sirrah.` :
-            `Ah yes, User <@${target}> (${target})—they have ${balance}gp.`
-          bot.replyPublic(message, reply)
-        })
-      }
-    }
   }
 })
 
