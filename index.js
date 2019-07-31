@@ -1,6 +1,10 @@
 var Botkit = require('botkit')
 var Airtable = require('airtable')
 var _ = require('lodash')
+var fs = require("fs");
+
+var rawData = fs.readFileSync("data.json");
+var data = JSON.parse(rawData);
 
 var base = new Airtable({
   apiKey: process.env.AIRTABLE_KEY
@@ -159,6 +163,13 @@ var transfer = (bot, channelType, user, target, amount, note, replyCallback) => 
           })
 
           isPrivate = true
+        } else if (rawData.bots.includes(target)) {
+          // send clean, splittable data string
+          bot.say({
+            user: '@' + target,
+            channel: '@' + target,
+            text: `<@${user}>,${amount},${replyNote}`
+          })
         }
 
         logTransaction(user, target, amount, note, true, "", isPrivate)
