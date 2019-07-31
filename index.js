@@ -2,7 +2,9 @@ var Botkit = require('botkit')
 var Airtable = require('airtable')
 var _ = require('lodash')
 
-var base = new Airtable({apiKey: process.env.AIRTABLE_KEY}).base(process.env.AIRTABLE_BASE);
+var base = new Airtable({
+  apiKey: process.env.AIRTABLE_KEY
+}).base(process.env.AIRTABLE_BASE);
 
 var redisConfig = {
   url: process.env.REDISCLOUD_URL
@@ -15,15 +17,18 @@ console.log("Booting bank bot")
 
 function createBalance(user, cb = () => {}) {
   console.log(`Creating balance for User ${user}`)
-  
+
   base('bank').create({
     "User": user,
     "Balance": startBalance
-  }, function(err, record) {
-      if (err) { console.error(err); return; }
-      console.log(`New balance created for User ${user}`)
-      // console.log(record)
-      cb(startBalance, record)
+  }, function (err, record) {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    console.log(`New balance created for User ${user}`)
+    // console.log(record)
+    cb(startBalance, record)
   });
 }
 
@@ -32,8 +37,11 @@ function setBalance(id, balance, cb = () => {}) {
 
   base('bank').update(id, {
     "Balance": balance
-  }, function(err, record) {
-    if (err) { console.error(err); return; }
+  }, function (err, record) {
+    if (err) {
+      console.error(err);
+      return;
+    }
     console.log(`Balance for Record ${id} set to ${balance}`)
     cb(balance, record)
   })
@@ -53,8 +61,7 @@ function getBalance(user, cb = () => {}) {
     if (records.length == 0) {
       console.log(`No balance found for User ${user}.`)
       createBalance(user, cb)
-    }
-    else {
+    } else {
       var record = records[0]
       var fields = record.fields
       var balance = fields['Balance']
@@ -75,9 +82,9 @@ var controller = Botkit.slackbot({
   storage: redisStorage
 });
 
-controller.setupWebserver(process.env.PORT, function(err,webserver) {
-    controller.createWebhookEndpoints(controller.webserver)
-    controller.createOauthEndpoints(controller.webserver)
+controller.setupWebserver(process.env.PORT, function (err, webserver) {
+  controller.createWebhookEndpoints(controller.webserver)
+  controller.createOauthEndpoints(controller.webserver)
 });
 
 function matchData(str, pattern, keys, obj = {}) {
@@ -98,10 +105,13 @@ function matchData(str, pattern, keys, obj = {}) {
 // @bot balance @zrl --> Returns zrl's balance
 var balancePattern = /^balance(?:\s+<@([A-z|0-9]+)>)?/i
 controller.hears(balancePattern.source, 'direct_mention,direct_message,bot_message', (bot, message) => {
-  var {text, user} = message
+  var {
+    text,
+    user
+  } = message
   var captures = balancePattern.exec(text)
   var target = captures[1] || user
-  
+
   console.log(`Received balance request from User ${user} for User ${target}`)
   console.log(message)
 
@@ -129,23 +139,22 @@ var transfer = (bot, channelType, user, target, amount, note, replyCallback) => 
       replyCallback(`Regrettably, you only have ${userBalance}gp in your account.`)
 
       logTransaction(user, target, amount, note, false, "Insufficient funds")
-    }
-    else {
+    } else {
       getBalance(target, (targetBalance, targetRecord) => {
-        setBalance(userRecord.id, userBalance-amount)
+        setBalance(userRecord.id, userBalance - amount)
         // Treats targetBalance+amount as a string concatenation. WHY???
-        setBalance(targetRecord.id, targetBalance-(-amount))
+        setBalance(targetRecord.id, targetBalance - (-amount))
 
         var replyNote = !note.length ? '.' : ` for "${note}"`
-        
+
         replyCallback(`I shall transfer ${amount}gp to <@${target}> immediately${replyNote}`)
 
         var isPrivate = false
 
         if (channelType == 'im') {
           bot.say({
-            user: '@'+target,
-            channel: '@'+target,
+            user: '@' + target,
+            channel: '@' + target,
             text: `Good morrow sirrah. <@${user}> has just transferred ${amount}gp to your account${replyNote}`
           })
 
@@ -176,7 +185,7 @@ function logTransaction(u, t, a, n, s, m, p) {
     "Admin Note": m,
     "Timestamp": Date.now(),
     "Private": p
-  }, function(err, record) {
+  }, function (err, record) {
     if (err) {
       console.error(err)
       return
@@ -188,7 +197,11 @@ function logTransaction(u, t, a, n, s, m, p) {
 // @bot give @zrl 100 --> Gives 100gp from my account to zrl's
 controller.hears(/give\s+<@([A-z|0-9]+)>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/i, 'direct_mention,direct_message,bot_message', (bot, message) => {
   // console.log(message)
-  var {text, user, event} = message
+  var {
+    text,
+    user,
+    event
+  } = message
 
   console.log(`Processing give request from ${user}`)
   console.log(message)
@@ -203,43 +216,55 @@ controller.hears(/give\s+<@([A-z|0-9]+)>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/i, 
 })
 
 controller.on('slash_command', (bot, message) => {
-  var {command, text, user_id} = message
+  var {
+    command,
+    text,
+    user_id
+  } = message
   var user = user_id
   console.log(`Slash command received from ${user_id}: ${text}`)
   console.log(message)
 
-  if (command == '/give') {
-    var pattern = /<@([A-z|0-9]+)\|.+>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/
-    var match = pattern.exec(text)
-    if (match) {
-      var target = match[1]
-      var amount = match[2]
-      var note = match[3] || ''
+  if (message.channel_id == process.env.SLACK_SELF_ID) {
+    bot.replyInThread(message, 'Ahoy ahoy. You\'re talking to me already... no need for slash commands to summon me!')
+    return
+  } else {
+    if (command == '/give') {
+      var pattern = /<@([A-z|0-9]+)\|.+>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/
+      var match = pattern.exec(text)
+      if (match) {
+        var target = match[1]
+        var amount = match[2]
+        var note = match[3] || ''
 
-      var replyCallback = text => bot.replyPublic(message, text)
+        var replyCallback = text => bot.replyPublic(message, text)
 
-      transfer(bot, 'public', user_id, target, amount, note, replyCallback)
+        transfer(bot, 'public', user_id, target, amount, note, replyCallback)
+      }
     }
-  }
 
-  if (command == '/balance') {
-    var pattern = /(?:<@([A-z|0-9]+)\|.+>)?/i
-    var match = pattern.exec(text)
-    if (match) {
-      var target = match[1] || user
-      console.log(`Received balance request from User ${user} for User ${target}`)
-      getBalance(target, (balance) => {
-        var reply = user == target ?
-          `You have ${balance}gp in your account, sirrah.` :
-          `Ah yes, User <@${target}> (${target})—they have ${balance}gp.`
-        bot.replyPublic(message, reply)
-      })
+    if (command == '/balance') {
+      var pattern = /(?:<@([A-z|0-9]+)\|.+>)?/i
+      var match = pattern.exec(text)
+      if (match) {
+        var target = match[1] || user
+        console.log(`Received balance request from User ${user} for User ${target}`)
+        getBalance(target, (balance) => {
+          var reply = user == target ?
+            `You have ${balance}gp in your account, sirrah.` :
+            `Ah yes, User <@${target}> (${target})—they have ${balance}gp.`
+          bot.replyPublic(message, reply)
+        })
+      }
     }
   }
 })
 
 controller.hears('.*', 'direct_mention,direct_message', (bot, message) => {
-  var {text, user} = message
+  var {
+    text,
+    user
+  } = message
   console.log(`Received unhandled message from User ${user}:\n${text}`)
 
   // Ignore if reply is in a thread. Hack to work around infinite bot loops.
