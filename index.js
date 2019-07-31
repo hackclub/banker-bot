@@ -155,6 +155,9 @@ var transfer = (bot, channelType, user, target, amount, note, replyCallback) => 
 
         var isPrivate = false
 
+        console.log("DATA: " + data.bots)
+        console.log("TARGET: " + target)
+
         if (channelType == 'im') {
           bot.say({
             user: '@' + target,
