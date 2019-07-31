@@ -114,9 +114,12 @@ controller.hears(balancePattern.source, 'direct_mention,direct_message,bot_messa
 })
 
 var transfer = (bot, channelType, user, target, amount, note, replyCallback) => {
+
   if (user == target) {
     console.log(`${user} attempting to transfer to theirself`)
     replyCallback(`What are you trying to pull here, <@${user}>?`)
+
+    logTransaction(user, target, amount, note, false, "Self transfer")
     return
   }
 
@@ -124,6 +127,8 @@ var transfer = (bot, channelType, user, target, amount, note, replyCallback) => 
     if (userBalance < amount) {
       console.log(`User has insufficient funds`)
       replyCallback(`Regrettably, you only have ${userBalance}gp in your account.`)
+
+      logTransaction(user, target, amount, note, false, "Insufficient funds")
     }
     else {
       getBalance(target, (targetBalance, targetRecord) => {
@@ -135,17 +140,47 @@ var transfer = (bot, channelType, user, target, amount, note, replyCallback) => 
         
         replyCallback(`I shall transfer ${amount}gp to <@${target}> immediately${replyNote}`)
 
+        var isPrivate = false
+
         if (channelType == 'im') {
           bot.say({
             user: '@'+target,
             channel: '@'+target,
             text: `Good morrow sirrah. <@${user}> has just transferred ${amount}gp to your account${replyNote}`
           })
+
+          isPrivate = true
         }
+
+        logTransaction(user, target, amount, note, true, "", isPrivate)
       })
     }
   })
 
+}
+
+// log transactions in ledger
+// parameters: user, target, amount, note, success, log message, private
+function logTransaction(u, t, a, n, s, m, p) {
+  if (p === undefined)
+    p = false
+
+  base('ledger').create({
+    "From": u,
+    "To": t,
+    "Amount": a,
+    "Note": n,
+    "Success": s,
+    "Admin Note": m,
+    "Timestamp": Date.now(),
+    "Private": p
+  }, function(err, record) {
+    if (err) {
+      console.error(err)
+      return
+    }
+    console.log("New ledger transaction logged: " + record.getId())
+  })
 }
 
 // @bot give @zrl 100 --> Gives 100gp from my account to zrl's
