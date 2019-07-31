@@ -163,7 +163,7 @@ var transfer = (bot, channelType, user, target, amount, note, replyCallback) => 
           })
 
           isPrivate = true
-        } else if (rawData.bots.includes(target)) {
+        } else if (data.bots.includes(target)) {
           // send clean, splittable data string
           bot.say({
             user: '@' + target,
