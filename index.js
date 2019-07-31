@@ -227,7 +227,7 @@ controller.on('slash_command', (bot, message) => {
 
 
   if (message.channel_id == process.env.SLACK_SELF_ID) {
-    bot.replyPublic(message, " ou're talking to me already... no need for slash commands to summon me!")
+    bot.replyPublic(message, "Just fyi... You're talking to me already... no need for slash commands to summon me!")
   } else {
     if (command == '/give') {
       var pattern = /<@([A-z|0-9]+)\|.+>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/
