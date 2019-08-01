@@ -168,7 +168,7 @@ var transfer = (bot, channelType, user, target, amount, note, replyCallback) => 
           bot.say({
             user: '@' + target,
             channel: '@' + target,
-            text: `<@${user}> | ${amount} | ${replyNote}`
+            text: `$$$ | <@${user}> | ${amount} | ${replyNote}`
           })
         }
 
