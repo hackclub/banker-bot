@@ -207,12 +207,15 @@ function logTransaction(u, t, a, n, s, m, p) {
 
 // @bot give @zrl 100 --> Gives 100gp from my account to zrl's
 controller.hears(/give\s+<@([A-z|0-9]+)>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/i, 'direct_mention,direct_message,bot_message', (bot, message) => {
+  
   // console.log(message)
   var {
     text,
     user,
     event
   } = message
+
+  if (message.type == "bot_message") return
 
   console.log(`Processing give request from ${user}`)
   console.log(message)
