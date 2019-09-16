@@ -127,7 +127,7 @@ controller.hears(balancePattern.source, 'direct_mention,direct_message,bot_messa
   })
 })
 
-var transfer = (bot, channelType, user, target, amount, note, replyCallback) => {
+var transfer = (bot, channelType, user, target, amount, note, replyCallback,ts,channelid) => {
 
   if (user == target) {
     console.log(`${user} attempting to transfer to theirself`)
@@ -168,7 +168,7 @@ var transfer = (bot, channelType, user, target, amount, note, replyCallback) => 
           bot.say({
             user: '@' + target,
             channel: '@' + target,
-            text: `$$$ | <@${user}> | ${amount} | ${replyNote}`
+            text: `$$$ | <@${user}> | ${amount} | ${replyNote} | ${channelid} | ${ts}`
           })
         }
 
@@ -212,10 +212,12 @@ controller.hears(/give\s+<@([A-z|0-9]+)>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/i, 
   var {
     text,
     user,
-    event
+    event,
+    ts,
+    channel
   } = message
 
-  if (message.type == "bot_message") return
+  if (message.type == "bot_message" && !(data.bots.includes(user))) return
 
   console.log(`Processing give request from ${user}`)
   console.log(message)
@@ -226,14 +228,16 @@ controller.hears(/give\s+<@([A-z|0-9]+)>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/i, 
 
   var replyCallback = text => bot.replyInThread(message, text)
 
-  transfer(bot, event['channel_type'], user, target, amount, note, replyCallback)
+  transfer(bot, event['channel_type'], user, target, amount, note, replyCallback,ts,channel)
 })
 
 controller.on('slash_command', (bot, message) => {
   var {
     command,
     text,
-    user_id
+    user_id,
+    ts,
+    channel
   } = message
   var user = user_id
   console.log(`Slash command received from ${user_id}: ${text}`)
@@ -253,7 +257,7 @@ controller.on('slash_command', (bot, message) => {
 
         var replyCallback = text => bot.replyPublic(message, text)
 
-        transfer(bot, 'public', user_id, target, amount, note, replyCallback)
+        transfer(bot, 'public', user_id, target, amount, note, replyCallback,ts,channel)
       }
     }
 
