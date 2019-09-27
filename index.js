@@ -216,7 +216,9 @@ controller.hears(/give\s+<@([A-z|0-9]+)>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/i, 
     ts,
     channel
   } = message
-
+  if (message.thread_ts) {
+    ts = message.thread_ts;
+  }
   if (message.type == "bot_message" && !(data.bots.includes(user))) return
 
   console.log(`Processing give request from ${user}`)
