@@ -261,7 +261,7 @@ controller.on('slash_command', (bot, message) => {
 
         transfer(bot, 'public', user_id, target, amount, note, replyCallback,ts,channel)
       } else {
-        bot.replyPublic(message, "I do not understand! Please type your message as `/give @user [positive-amount]gp for [reason]`")
+        bot.replyPrivate(message, "I do not understand! Please type your message as `/give @user [positive-amount]gp for [reason]`")
       }
     }
 
