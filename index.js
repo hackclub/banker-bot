@@ -143,10 +143,6 @@ var transfer = (bot, channelType, user, target, amount, note, replyCallback,ts,c
       replyCallback(`Regrettably, you only have ${userBalance}gp in your account.`)
 
       logTransaction(user, target, amount, note, false, "Insufficient funds")
-    } else if (amount < 0) {
-      console.log(`${user} attempted to do a negative transfer to ${target}`)
-      replyCallback(`What are you trying to pull here sirrah?`);
-      logTransaction(user, target, amount, note, false,"Negative Transfer")
     } else {
       getBalance(target, (targetBalance, targetRecord) => {
         setBalance(userRecord.id, userBalance - amount)
@@ -264,6 +260,8 @@ controller.on('slash_command', (bot, message) => {
         var replyCallback = text => bot.replyPublic(message, text)
 
         transfer(bot, 'public', user_id, target, amount, note, replyCallback,ts,channel)
+      } else {
+        bot.replyPublic(message, "I do not understand! Please type your message as `/give @user [positive-amount]gp for [reason]`")
       }
     }
 
