@@ -143,6 +143,9 @@ var transfer = (bot, channelType, user, target, amount, note, replyCallback,ts,c
       replyCallback(`Regrettably, you only have ${userBalance}gp in your account.`)
 
       logTransaction(user, target, amount, note, false, "Insufficient funds")
+    } else if (amount < 0) {
+      replyCallback(`What are you trying to pull here sirrah?`);
+      logTransaction(user, target, amount, note, false,"Negative Transfer")
     } else {
       getBalance(target, (targetBalance, targetRecord) => {
         setBalance(userRecord.id, userBalance - amount)
