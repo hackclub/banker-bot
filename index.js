@@ -144,6 +144,7 @@ var transfer = (bot, channelType, user, target, amount, note, replyCallback,ts,c
 
       logTransaction(user, target, amount, note, false, "Insufficient funds")
     } else if (amount < 0) {
+      console.log(`${user} attempted to do a negative transfer to ${target}`)
       replyCallback(`What are you trying to pull here sirrah?`);
       logTransaction(user, target, amount, note, false,"Negative Transfer")
     } else {
