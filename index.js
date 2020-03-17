@@ -257,8 +257,6 @@ function createInvoice(sender, recipient, amount, note) {
   })
 }
 
-function acceptInvoice(id)
-
 // @bot give @zrl 100 --> Gives 100gp from my account to zrl's
 controller.hears(/give\s+<@([A-z|0-9]+)>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/i, 'direct_mention,direct_message,bot_message', (bot, message) => {
   
