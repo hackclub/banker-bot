@@ -76,6 +76,18 @@ function getBalance(user, cb = () => {}) {
   })
 }
 
+function getInvoice(id) {
+  return new Promise((resolve, reject) => {
+    base('invoices').find(id).firstPage((err, record) => {
+      if (err) {
+        console.error(err)
+        reject(err)
+      }
+      resolve(record)
+    })
+  })
+}
+
 console.log("Booting banker bot")
 
 var controller = Botkit.slackbot({
@@ -144,7 +156,7 @@ var invoice = async (bot, channelType, sender, recipient, amount, note, replyCal
   bot.say({
     user: '@' + recipient,
     channel: '@' + recipient,
-    text: `Good morrow sirrah. <@${sender}> has just sent you an invoice of ${amount}gp for "${note}". Reply with \`@banker accept ${invRecord.id}\` or \`@banker reject ${invRecord.id}\`.`
+    text: `Good morrow sirrah. <@${sender}> has just sent you an invoice of ${amount}gp for "${note}". Reply with "@banker pay ${invRecord.id}".`
   })
 }
 
@@ -245,6 +257,8 @@ function createInvoice(sender, recipient, amount, note) {
   })
 }
 
+function acceptInvoice(id)
+
 // @bot give @zrl 100 --> Gives 100gp from my account to zrl's
 controller.hears(/give\s+<@([A-z|0-9]+)>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/i, 'direct_mention,direct_message,bot_message', (bot, message) => {
   
@@ -289,7 +303,6 @@ controller.hears(/invoice\s+<@([A-z|0-9]+)>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/
   if (message.type == "bot_message" && !(data.bots.includes(user))) return
 
   console.log(`Processing invoice request from ${user}`)
-  console.log(message)
 
   var target = message.match[1]
   var amount = message.match[2]
@@ -297,6 +310,36 @@ controller.hears(/invoice\s+<@([A-z|0-9]+)>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/
 
   var replyCallback = text => bot.replyInThread(message, text)
   invoice(bot, event['channel_type'], user, target, amount, note, replyCallback, ts, channel)
+})
+
+// @bot pay rec182yhe902 --> pays an invoice
+
+controller.hears(/pay\s+([A-z|0-9]+)/i, 'direct_mention,direct_message,bot_message', async (bot, message) => {
+  var {
+    text,
+    user,
+    event,
+    ts,
+    channel
+  } = message
+  if (message.thread_ts) {
+    ts = message.thread_ts
+  }
+  if (message.type == "bot_message" && !(data.bots.includes(user))) return
+
+  console.log(`Processing invoice acceptance from ${user}`)
+
+  var id = message.match[1]
+  var invRecord = await getInvoice(id)
+
+  if (invRecord.fields['Paid']) {
+    bot.replyInThread(message, "You've already paid this invoice!")
+  }
+  var amount = invRecord.fields['Amount']
+  var target = invRecord.fields['To']
+  var note = `for invoice ${invRecord.id}`
+
+  transfer(bot, channel.type, user, target, amount, note, replyCallback, ts, channel)
 })
 
 controller.on('slash_command', (bot, message) => {
