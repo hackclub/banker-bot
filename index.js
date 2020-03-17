@@ -245,11 +245,11 @@ controller.on('slash_command', (bot, message) => {
   console.log(`Slash command received from ${user_id}: ${text}`)
   console.log(message)
 
-  if (message.channel_id == process.env.SLACK_SELF_ID) {
-    bot.replyPublic(message, "Just fyi... You're talking to me already... no need for slash commands to summon me!")
-  } else {
-    bot.replyAcknowledge()
+  bot.replyAcknowledge()
 
+  if (message.channel_id == process.env.SLACK_SELF_ID) {
+    bot.replyPublicDelayed(message, "Just fyi... You're talking to me already... no need for slash commands to summon me!")
+  } else {
     if (command == '/give') {
       var pattern = /<@([A-z|0-9]+)\|.+>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/
       var match = pattern.exec(text)
@@ -258,11 +258,11 @@ controller.on('slash_command', (bot, message) => {
         var amount = match[2]
         var note = match[3] || ''
 
-        var replyCallback = text => bot.replyPublic(message, text)
+        var replyCallback = text => bot.replyPublicDelayed(message, text)
 
         transfer(bot, 'public', user_id, target, amount, note, replyCallback,ts,channel)
       } else {
-        bot.replyPrivate(message, "I do not understand! Please type your message as `/give @user [positive-amount]gp for [reason]`")
+        bot.replyPrivateDelayed(message, "I do not understand! Please type your message as `/give @user [positive-amount]gp for [reason]`")
       }
     }
 
@@ -276,7 +276,7 @@ controller.on('slash_command', (bot, message) => {
           var reply = user == target ?
             `You have ${balance}gp in your account, sirrah.` :
             `Ah yes, User <@${target}> (${target})—they have ${balance}gp.`
-          bot.replyPublic(message, reply)
+          bot.replyPublicDelayed(message, reply)
         })
       }
     }
