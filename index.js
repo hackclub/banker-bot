@@ -285,7 +285,8 @@ controller.hears(/give\s+<@([A-z|0-9]+)>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/i, 
 })
 
 // @bot invoice @zrl 100 for stickers --> Creates invoice for 100gp & notifies @zrl
-controller.hears(/invoice\s+<@(A-z|0-9]+)>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/i, 'direct_mention,direct_message,bot_message', (bot, message) => {
+
+controller.hears(/invoice\s+<@([A-z|0-9]+)>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/i, 'direct_mention,direct_message,bot_message', (bot, message) => {
   var {
     text,
     user,
