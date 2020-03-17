@@ -127,6 +127,38 @@ controller.hears(balancePattern.source, 'direct_mention,direct_message,bot_messa
   })
 })
 
+var invoice = async (bot, channelType, sender, recipient, amount, note, replyCallback, ts, channelid) => {
+  if (sender == recipient) {
+    console.log(`${sender} attempting to invoice theirself`)
+    replyCallback(`What are you trying to pull here, <@${sender}>?`)
+
+    return
+  }
+
+  replyCallback(`I shall invoice ${recipient} ${amount}gp for "${note}"`)
+
+  var invRecord = await createInvoice(sender, recipient, amount, note)
+
+  var isPrivate = false
+
+  if (channelType == 'im') {
+    bot.say({
+      user: '@' + target,
+      channel: '@' + target,
+      text: `Good morrow sirrah. <@${sender}> has just sent you an invoice of ${amount}gp for "${note}". Reply with \`@banker accept ${invRecord.recordId()}\` or \`@banker reject ${invRecord.recordId()}\`.`
+    })
+
+    isPrivate = true
+  } else if (data.bots.includes(target)) {
+    // send clean, splittable data string
+    bot.say({
+      user: '@' + target,
+      channel: '@' + target,
+      text: `$$$ | <@${user}> | ${amount} | ${replyNote} | ${channelid} | ${ts}`
+    })
+  }
+}
+
 var transfer = (bot, channelType, user, target, amount, note, replyCallback,ts,channelid) => {
 
   if (user == target) {
@@ -205,6 +237,25 @@ function logTransaction(u, t, a, n, s, m, p) {
   })
 }
 
+// log invoice on airtable
+function createInvoice(sender, recipient, amount, note) {
+  return new Promise((resolve, reject) => {
+    base('invoices').create({
+      "From": sender,
+      "To": recipient,
+      "Amount": parseInt(a),
+      "Reason": note
+    }, function (err, record) {
+      if (err) {
+        console.error(err)
+        reject(err)
+      }
+      console.log("New invoice created:", record.getId())
+      resolve(record)
+    })
+  })
+}
+
 // @bot give @zrl 100 --> Gives 100gp from my account to zrl's
 controller.hears(/give\s+<@([A-z|0-9]+)>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/i, 'direct_mention,direct_message,bot_message', (bot, message) => {
   
@@ -231,6 +282,31 @@ controller.hears(/give\s+<@([A-z|0-9]+)>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/i, 
   var replyCallback = text => bot.replyInThread(message, text)
 
   transfer(bot, event['channel_type'], user, target, amount, note, replyCallback,ts,channel)
+})
+
+// @bot invoice @zrl 100 for stickers --> Creates invoice for 100gp & notifies @zrl
+controller.hears(/invoice\s+<@(A-z|0-9]+)>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/i, 'direct_mention,direct_message,bot_message', (bot, message) => {
+  var {
+    text,
+    user,
+    event,
+    ts,
+    channel
+  } = message
+  if (message.thread_ts) {
+    ts = message.thread_ts;
+  }
+  if (message.type == "bot_message" && !(data.bots.includes(user))) return
+
+  console.log(`Processing invoice request from ${user}`)
+  console.log(message)
+
+  var target = message.match[1]
+  var amount = message.match[2]
+  var note = message.match[3] || ''
+
+  var replyCallback = text => bot.replyInThread(message, text)
+  invoice(bot, event['channel_type'], user, target, amount, note, replyCallback, ts, channel)
 })
 
 controller.on('slash_command', (bot, message) => {
