@@ -243,7 +243,7 @@ function createInvoice(sender, recipient, amount, note) {
     base('invoices').create({
       "From": sender,
       "To": recipient,
-      "Amount": parseInt(a),
+      "Amount": parseInt(amount),
       "Reason": note
     }, function (err, record) {
       if (err) {
