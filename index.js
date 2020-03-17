@@ -334,7 +334,7 @@ controller.hears(/pay\s+([A-z|0-9]+)/i, 'direct_mention,direct_message,bot_messa
     bot.replyInThread(message, "You've already paid this invoice!")
   }
   var amount = invRecord.fields['Amount']
-  var target = invRecord.fields['To']
+  var target = invRecord.fields['From']
   var note = `for invoice ${invRecord.id}`
   var replyCallback = text => bot.replyInThread(message, text)
 
