@@ -325,7 +325,7 @@ controller.hears(/pay\s+([A-z|0-9]+)/i, 'direct_mention,direct_message,bot_messa
   }
   if (message.type == "bot_message" && !(data.bots.includes(user))) return
 
-  console.log(`Processing invoice acceptance from ${user}`)
+  console.log(`Processing invoice payment from ${user}`)
 
   var id = message.match[1]
   var invRecord = await getInvoice(id)
