@@ -245,6 +245,7 @@ controller.on('slash_command', (bot, message) => {
   console.log(`Slash command received from ${user_id}: ${text}`)
   console.log(message)
 
+  bot.replyAcknowledge()
 
   if (message.channel_id == process.env.SLACK_SELF_ID) {
     bot.replyPublic(message, "Just fyi... You're talking to me already... no need for slash commands to summon me!")
