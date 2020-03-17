@@ -144,7 +144,7 @@ var invoice = async (bot, channelType, sender, recipient, amount, note, replyCal
   bot.say({
     user: '@' + recipient,
     channel: '@' + recipient,
-    text: `Good morrow sirrah. <@${sender}> has just sent you an invoice of ${amount}gp for "${note}". Reply with \`@banker accept ${invRecord.recordId()}\` or \`@banker reject ${invRecord.recordId()}\`.`
+    text: `Good morrow sirrah. <@${sender}> has just sent you an invoice of ${amount}gp for "${note}". Reply with \`@banker accept ${invRecord.id()}\` or \`@banker reject ${invRecord.id()}\`.`
   })
 }
 
