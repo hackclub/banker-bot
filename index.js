@@ -78,7 +78,7 @@ function getBalance(user, cb = () => {}) {
 
 function getInvoice(id) {
   return new Promise((resolve, reject) => {
-    base('invoices').find(id).firstPage((err, record) => {
+    base('invoices').find(id, (err, record) => {
       if (err) {
         console.error(err)
         reject(err)
