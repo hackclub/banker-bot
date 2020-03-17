@@ -274,8 +274,8 @@ controller.on('slash_command', (bot, message) => {
         console.log(`Received balance request from User ${user} for User ${target}`)
         getBalance(target, (balance) => {
           var reply = user == target ?
-            `You have ${balance}gp in your account, sirrah.` :
-            `Ah yes, User <@${target}> (${target})—they have ${balance}gp.`
+            `Ah yes, <@${target}> (${target}). You have ${balance}gp in your account, sirrah.` :
+            `Ah yes, <@${target}> (${target})—they have ${balance}gp.`
           bot.replyPublicDelayed(message, reply)
         })
       }
