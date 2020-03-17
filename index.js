@@ -141,22 +141,11 @@ var invoice = async (bot, channelType, sender, recipient, amount, note, replyCal
 
   var isPrivate = false
 
-  if (channelType == 'im') {
-    bot.say({
-      user: '@' + target,
-      channel: '@' + target,
-      text: `Good morrow sirrah. <@${sender}> has just sent you an invoice of ${amount}gp for "${note}". Reply with \`@banker accept ${invRecord.recordId()}\` or \`@banker reject ${invRecord.recordId()}\`.`
-    })
-
-    isPrivate = true
-  } else if (data.bots.includes(target)) {
-    // send clean, splittable data string
-    bot.say({
-      user: '@' + target,
-      channel: '@' + target,
-      text: `$$$ | <@${user}> | ${amount} | ${replyNote} | ${channelid} | ${ts}`
-    })
-  }
+  bot.say({
+    user: '@' + target,
+    channel: '@' + target,
+    text: `Good morrow sirrah. <@${sender}> has just sent you an invoice of ${amount}gp for "${note}". Reply with \`@banker accept ${invRecord.recordId()}\` or \`@banker reject ${invRecord.recordId()}\`.`
+  })
 }
 
 var transfer = (bot, channelType, user, target, amount, note, replyCallback,ts,channelid) => {
