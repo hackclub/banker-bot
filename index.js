@@ -17,6 +17,17 @@ var redisStorage = require('botkit-storage-redis')(redisConfig)
 
 var startBalance = 0
 
+// maps invoice ids, e.g. "rec2jrE82X7v2J9Rp" to callbacks you
+// can pass a message to to have that call back log the fulfillment
+// of the invoice into the slack thread from which the invoice originated.
+// 
+// note that this isn't serialized; if the banker restarts in the midst of
+// a transaction, then even if the invoice is payed, the banker will not reply
+// in the thread from which the invoice originated, although the transaction
+// will still be logged, the funds will still be transferred, and DMs will
+// still be sent to the individual receiving the funds.
+var invoiceReplies = {};
+
 console.log("Booting bank bot")
 
 function createBalance(user, cb = () => {}) {
@@ -152,6 +163,8 @@ var invoice = async (bot, channelType, sender, recipient, amount, note, replyCal
   var invRecord = await createInvoice(sender, recipient, amount, note)
 
   var isPrivate = false
+
+	invoiceReplies[invRecord.id] = replyCallBack;
 
   bot.say({
     user: '@' + recipient,
@@ -336,7 +349,12 @@ controller.hears(/pay\s+([A-z|0-9]+)/i, 'direct_mention,direct_message,bot_messa
   var amount = invRecord.fields['Amount']
   var target = invRecord.fields['From']
   var note = `for invoice ${invRecord.id}`
-  var replyCallback = text => bot.replyInThread(message, text)
+  var replyCallback = text => {
+		bot.replyInThread(message, text)
+		if (typeof invoiceReplies[id] == "function") {
+			invoiceReplies[id](text)
+		}
+	};
 
   transfer(bot, channel.type, user, target, amount, note, replyCallback, ts, channel)
 })
