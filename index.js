@@ -197,7 +197,7 @@ var transfer = (bot, channelType, user, target, amount, note, replyCallback,ts,c
             user: '@' + target,
             channel: '@' + target,
             text: `Good morrow sirrah.`
-				+ `<@${user}> has just transferred ${amount}gp to your account` + replyNote
+			  + `<@${user}> has just transferred ${amount}gp to your account` + replyNote
           })
 
           isPrivate = true
