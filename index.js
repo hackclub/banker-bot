@@ -182,9 +182,10 @@ var transfer = (bot, channelType, user, target, amount, note, replyCallback,ts,c
         // Treats targetBalance+amount as a string concatenation. WHY???
         setBalance(targetRecord.id, targetBalance - (-amount))
 
-        var replyNote = !note.length ? '.' : ` for "${note}"`
-
-        replyCallback(`I shall transfer ${amount}gp to <@${target}> immediately${replyNote}`)
+        replyCallback(
+		  `I shall transfer ${amount}gp to <@${target}> immediately`
+			  + note ? ` for "${note}"` : '.'
+		)
 
         var isPrivate = false
 
