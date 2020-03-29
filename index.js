@@ -19,7 +19,7 @@ var startBalance = 0
 
 console.log("Booting bank bot")
 
-function createBalance(user, cb = () => {}) {
+function createBalance(user, cb = () => { }) {
   console.log(`Creating balance for User ${user}`)
 
   base('bank').create({
@@ -36,7 +36,7 @@ function createBalance(user, cb = () => {}) {
   });
 }
 
-function setBalance(id, balance, cb = () => {}) {
+function setBalance(id, balance, cb = () => { }) {
   console.log(`Setting balance for Record ${id} to ${balance}`)
 
   base('bank').update(id, {
@@ -51,7 +51,7 @@ function setBalance(id, balance, cb = () => {}) {
   })
 }
 
-function getBalance(user, cb = () => {}) {
+function getBalance(user, cb = () => { }) {
   console.log(`Retrieving balance for User ${user}`)
 
   base('bank').select({
@@ -147,7 +147,9 @@ var invoice = async (bot, channelType, sender, recipient, amount, note, replyCal
     return
   }
 
-  replyCallback(`I shall invoice <@${recipient}> ${amount}gp for "${note}"`)
+  var replyNote = note ? ` for "${note}".` : '.';
+
+  replyCallback(`I shall invoice <@${recipient}> ${amount}gp` + replyNote)
 
   var invRecord = await createInvoice(sender, recipient, amount, note)
 
@@ -156,11 +158,12 @@ var invoice = async (bot, channelType, sender, recipient, amount, note, replyCal
   bot.say({
     user: '@' + recipient,
     channel: '@' + recipient,
-    text: `Good morrow sirrah. <@${sender}> has just sent you an invoice of ${amount}gp for "${note}". Reply with "@banker pay ${invRecord.id}".`
+    text: `Good morrow sirrah. <@${sender}> has just sent you an invoice of ${amount}gp${replyNote}
+       Reply with "@banker pay ${invRecord.id}".`
   })
 }
 
-var transfer = (bot, channelType, user, target, amount, note, replyCallback,ts,channelid) => {
+var transfer = (bot, channelType, user, target, amount, note, replyCallback, ts, channelid) => {
 
   if (user == target) {
     console.log(`${user} attempting to transfer to theirself`)
@@ -182,9 +185,9 @@ var transfer = (bot, channelType, user, target, amount, note, replyCallback,ts,c
         // Treats targetBalance+amount as a string concatenation. WHY???
         setBalance(targetRecord.id, targetBalance - (-amount))
 
-        var replyNote = !note.length ? '.' : ` for "${note}"`
+        var replyNote = note ? ` for "${note}".` : '.';
 
-        replyCallback(`I shall transfer ${amount}gp to <@${target}> immediately${replyNote}`)
+        replyCallback(`I shall transfer ${amount}gp to <@${target}> immediately` + replyNote)
 
         var isPrivate = false
 
@@ -259,7 +262,7 @@ function createInvoice(sender, recipient, amount, note) {
 
 // @bot give @zrl 100 --> Gives 100gp from my account to zrl's
 controller.hears(/give\s+<@([A-z|0-9]+)>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/i, 'direct_mention,direct_message,bot_message', (bot, message) => {
-  
+
   // console.log(message)
   var {
     text,
@@ -282,7 +285,7 @@ controller.hears(/give\s+<@([A-z|0-9]+)>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/i, 
 
   var replyCallback = text => bot.replyInThread(message, text)
 
-  transfer(bot, event['channel_type'], user, target, amount, note, replyCallback,ts,channel)
+  transfer(bot, event['channel_type'], user, target, amount, note, replyCallback, ts, channel)
 })
 
 // @bot invoice @zrl 100 for stickers --> Creates invoice for 100gp & notifies @zrl
@@ -356,7 +359,10 @@ controller.on('slash_command', (bot, message) => {
   bot.replyAcknowledge()
 
   if (message.channel_id == process.env.SLACK_SELF_ID) {
-    bot.replyPublicDelayed(message, "Just fyi... You're talking to me already... no need for slash commands to summon me!")
+    bot.replyPublicDelayed(
+      message,
+      "Just fyi... You're talking to me already... no need for slash commands to summon me!"
+    )
   } else {
     if (command == '/give') {
       var pattern = /<@([A-z|0-9]+)\|.+>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/
@@ -368,9 +374,12 @@ controller.on('slash_command', (bot, message) => {
 
         var replyCallback = text => bot.replyPublicDelayed(message, text)
 
-        transfer(bot, 'public', user_id, target, amount, note, replyCallback,ts,channel)
+        transfer(bot, 'public', user_id, target, amount, note, replyCallback, ts, channel)
       } else {
-        bot.replyPrivateDelayed(message, "I do not understand! Please type your message as `/give @user [positive-amount]gp for [reason]`")
+        bot.replyPrivateDelayed(
+          message,
+          "I do not understand! Please type your message as `/give @user [positive-amount]gp for [reason]`"
+        )
       }
     }
 
