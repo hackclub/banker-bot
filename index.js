@@ -382,7 +382,7 @@ controller.on('slash_command', (bot, message) => {
           message,
           "I do not understand!"
             + "Please type your message as `/give @user [positive-amount]gp for [reason]`"
-				)
+        )
       }
     }
 
