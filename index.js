@@ -147,7 +147,7 @@ var invoice = async (bot, channelType, sender, recipient, amount, note, replyCal
     return
   }
 
-  replyCallback(`I shall invoice <@${recipient}> ${amount}gp for "${note}"`)
+  replyCallback(`I shall invoice <@${recipient}> ${amount}gp` + (note ? ` for "${note}"` : ''))
 
   var invRecord = await createInvoice(sender, recipient, amount, note)
 
