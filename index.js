@@ -147,7 +147,9 @@ var invoice = async (bot, channelType, sender, recipient, amount, note, replyCal
     return
   }
 
-  replyCallback(`I shall invoice <@${recipient}> ${amount}gp` + (note ? ` for "${note}"` : ''))
+  var replyNote = note ? ` for "${note}".` : '.';
+
+  replyCallback(`I shall invoice <@${recipient}> ${amount}gp` + replyNote)
 
   var invRecord = await createInvoice(sender, recipient, amount, note)
 
@@ -156,7 +158,9 @@ var invoice = async (bot, channelType, sender, recipient, amount, note, replyCal
   bot.say({
     user: '@' + recipient,
     channel: '@' + recipient,
-    text: `Good morrow sirrah. <@${sender}> has just sent you an invoice of ${amount}gp for "${note}". Reply with "@banker pay ${invRecord.id}".`
+    text: `Good morrow sirrah.`
+	  + ` <@${sender}> has just sent you an invoice of ${amount}gp` + replyNote
+	  + ` Reply with "@banker pay ${invRecord.id}".`
   })
 }
 
@@ -182,10 +186,8 @@ var transfer = (bot, channelType, user, target, amount, note, replyCallback,ts,c
         // Treats targetBalance+amount as a string concatenation. WHY???
         setBalance(targetRecord.id, targetBalance - (-amount))
 
-        replyCallback(
-		  `I shall transfer ${amount}gp to <@${target}> immediately`
-			  + note ? ` for "${note}"` : '.'
-		)
+        var replyNote = note ? ` for "${note}".` : '.';
+        replyCallback(`I shall transfer ${amount}gp to <@${target}> immediately` + replyNote)
 
         var isPrivate = false
 
@@ -193,7 +195,8 @@ var transfer = (bot, channelType, user, target, amount, note, replyCallback,ts,c
           bot.say({
             user: '@' + target,
             channel: '@' + target,
-            text: `Good morrow sirrah. <@${user}> has just transferred ${amount}gp to your account${replyNote}`
+            text: `Good morrow sirrah.`
+				+ `<@${user}> has just transferred ${amount}gp to your account` + replyNote
           })
 
           isPrivate = true
