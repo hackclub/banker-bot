@@ -158,9 +158,9 @@ var invoice = async (bot, channelType, sender, recipient, amount, note, replyCal
   bot.say({
     user: '@' + recipient,
     channel: '@' + recipient,
-		text: `Good morrow sirrah.`
-			+ ` <@${sender}> has just sent you an invoice of ${amount}gp` + replyNote
-			+ ` Reply with "@banker pay ${invRecord.id}".`
+    text: `Good morrow sirrah.`
+      + ` <@${sender}> has just sent you an invoice of ${amount}gp` + replyNote
+      + ` Reply with "@banker pay ${invRecord.id}".`
   })
 }
 
@@ -196,8 +196,8 @@ var transfer = (bot, channelType, user, target, amount, note, replyCallback,ts,c
           bot.say({
             user: '@' + target,
             channel: '@' + target,
-						text: `Good morrow sirrah.`
-							+ `<@${user}> has just transferred ${amount}gp to your account` + replyNote
+            text: `Good morrow sirrah.`
+              + `<@${user}> has just transferred ${amount}gp to your account` + replyNote
           })
 
           isPrivate = true
@@ -361,10 +361,10 @@ controller.on('slash_command', (bot, message) => {
   bot.replyAcknowledge()
 
   if (message.channel_id == process.env.SLACK_SELF_ID) {
-		bot.replyPublicDelayed(
-			message,
-			"Just fyi... You're talking to me already... no need for slash commands to summon me!"
-		)
+    bot.replyPublicDelayed(
+      message,
+      "Just fyi... You're talking to me already... no need for slash commands to summon me!"
+    )
   } else {
     if (command == '/give') {
       var pattern = /<@([A-z|0-9]+)\|.+>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/
@@ -378,10 +378,10 @@ controller.on('slash_command', (bot, message) => {
 
         transfer(bot, 'public', user_id, target, amount, note, replyCallback,ts,channel)
       } else {
-				bot.replyPrivateDelayed(
-					message,
-					"I do not understand!"
-						+ "Please type your message as `/give @user [positive-amount]gp for [reason]`"
+        bot.replyPrivateDelayed(
+          message,
+          "I do not understand!"
+            + "Please type your message as `/give @user [positive-amount]gp for [reason]`"
 				)
       }
     }
