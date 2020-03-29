@@ -360,7 +360,10 @@ controller.on('slash_command', (bot, message) => {
   bot.replyAcknowledge()
 
   if (message.channel_id == process.env.SLACK_SELF_ID) {
-    bot.replyPublicDelayed(message, "Just fyi... You're talking to me already... no need for slash commands to summon me!")
+    bot.replyPublicDelayed(
+	  message,
+	  "Just fyi... You're talking to me already... no need for slash commands to summon me!"
+	)
   } else {
     if (command == '/give') {
       var pattern = /<@([A-z|0-9]+)\|.+>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/
@@ -374,7 +377,11 @@ controller.on('slash_command', (bot, message) => {
 
         transfer(bot, 'public', user_id, target, amount, note, replyCallback,ts,channel)
       } else {
-        bot.replyPrivateDelayed(message, "I do not understand! Please type your message as `/give @user [positive-amount]gp for [reason]`")
+        bot.replyPrivateDelayed(
+		  message,
+		  "I do not understand!"
+			+ "Please type your message as `/give @user [positive-amount]gp for [reason]`"
+	  	)
       }
     }
 
