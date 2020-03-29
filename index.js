@@ -18,7 +18,7 @@ var redisStorage = require('botkit-storage-redis')(redisConfig)
 var startBalance = 0
 
 // maps invoice ids, e.g. "rec2jrE82X7v2J9Rp" to callbacks you
-// can pass a message to to have that call back log the fulfillment
+// can pass a message to to have that callback log the fulfillment
 // of the invoice into the slack thread from which the invoice originated.
 // 
 // note that this isn't serialized; if the banker restarts in the midst of
