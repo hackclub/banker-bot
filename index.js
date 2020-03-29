@@ -17,20 +17,11 @@ var redisStorage = require('botkit-storage-redis')(redisConfig)
 
 var startBalance = 0
 
-// maps invoice ids, e.g. "rec2jrE82X7v2J9Rp" to callbacks you
-// can pass a message to to have that callback log the fulfillment
-// of the invoice into the slack thread from which the invoice originated.
-// 
-// note that this isn't serialized; if the banker restarts in the midst of
-// a transaction, then even if the invoice is payed, the banker will not reply
-// in the thread from which the invoice originated, although the transaction
-// will still be logged, the funds will still be transferred, and DMs will
-// still be sent to the individual receiving the funds.
 var invoiceReplies = {};
 
 console.log("Booting bank bot")
 
-function createBalance(user, cb = () => {}) {
+function createBalance(user, cb = () => { }) {
   console.log(`Creating balance for User ${user}`)
 
   base('bank').create({
@@ -47,7 +38,7 @@ function createBalance(user, cb = () => {}) {
   });
 }
 
-function setBalance(id, balance, cb = () => {}) {
+function setBalance(id, balance, cb = () => { }) {
   console.log(`Setting balance for Record ${id} to ${balance}`)
 
   base('bank').update(id, {
@@ -62,7 +53,7 @@ function setBalance(id, balance, cb = () => {}) {
   })
 }
 
-function getBalance(user, cb = () => {}) {
+function getBalance(user, cb = () => { }) {
   console.log(`Retrieving balance for User ${user}`)
 
   base('bank').select({
@@ -173,7 +164,7 @@ var invoice = async (bot, channelType, sender, recipient, amount, note, replyCal
   })
 }
 
-var transfer = (bot, channelType, user, target, amount, note, replyCallback,ts,channelid) => {
+var transfer = (bot, channelType, user, target, amount, note, replyCallback, ts, channelid) => {
 
   if (user == target) {
     console.log(`${user} attempting to transfer to theirself`)
@@ -272,7 +263,7 @@ function createInvoice(sender, recipient, amount, note) {
 
 // @bot give @zrl 100 --> Gives 100gp from my account to zrl's
 controller.hears(/give\s+<@([A-z|0-9]+)>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/i, 'direct_mention,direct_message,bot_message', (bot, message) => {
-  
+
   // console.log(message)
   var {
     text,
@@ -295,7 +286,7 @@ controller.hears(/give\s+<@([A-z|0-9]+)>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/i, 
 
   var replyCallback = text => bot.replyInThread(message, text)
 
-  transfer(bot, event['channel_type'], user, target, amount, note, replyCallback,ts,channel)
+  transfer(bot, event['channel_type'], user, target, amount, note, replyCallback, ts, channel)
 })
 
 // @bot invoice @zrl 100 for stickers --> Creates invoice for 100gp & notifies @zrl
@@ -386,7 +377,7 @@ controller.on('slash_command', (bot, message) => {
 
         var replyCallback = text => bot.replyPublicDelayed(message, text)
 
-        transfer(bot, 'public', user_id, target, amount, note, replyCallback,ts,channel)
+        transfer(bot, 'public', user_id, target, amount, note, replyCallback, ts, channel)
       } else {
         bot.replyPrivateDelayed(message, "I do not understand! Please type your message as `/give @user [positive-amount]gp for [reason]`")
       }
