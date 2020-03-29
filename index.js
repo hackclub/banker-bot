@@ -187,6 +187,7 @@ var transfer = (bot, channelType, user, target, amount, note, replyCallback,ts,c
         setBalance(targetRecord.id, targetBalance - (-amount))
 
         var replyNote = note ? ` for "${note}".` : '.';
+		  
         replyCallback(`I shall transfer ${amount}gp to <@${target}> immediately` + replyNote)
 
         var isPrivate = false
