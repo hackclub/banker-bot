@@ -157,7 +157,7 @@ var invoice = async (bot, channelType, sender, recipient, amount, note, replyCal
 
   var isPrivate = false
 
-  invoiceReplies[invRecord.id] = replyCallBack;
+  invoiceReplies[invRecord.id] = replyCallback;
 
   bot.say({
     user: '@' + recipient,
