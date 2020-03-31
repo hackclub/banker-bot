@@ -346,7 +346,7 @@ controller.hears(/pay\s+([A-z|0-9]+)/i, 'direct_mention,direct_message,bot_messa
   var replyCallback = text => {
     bot.replyInThread(message, text)
     if (typeof invoiceReplies[id] == "function") {
-      invoiceReplies[id]("<@${target}> paid their invoice of ${amount} gp from <@${user}>.")
+      invoiceReplies[id](`<@${target}> paid their invoice of ${amount} gp from <@${user}>.`)
     }
   };
 
