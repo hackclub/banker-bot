@@ -148,7 +148,8 @@ var invoice = async (bot, channelType, sender, recipient, amount, note, replyCal
 
     return
   }
-
+  replyCallback("F U. You're asking for money you friggin plebian, go and make some through hard work!")
+  /*
   var replyNote = note ? ` for "${note}".` : '.';
 
   replyCallback(`I shall invoice <@${recipient}> ${amount}gp` + replyNote)
@@ -164,7 +165,7 @@ var invoice = async (bot, channelType, sender, recipient, amount, note, replyCal
     channel: '@' + recipient,
     text: `Good morrow sirrah. <@${sender}> has just sent you an invoice of ${amount}gp${replyNote}
        Reply with "@banker pay ${invRecord.id}".`
-  })
+  })*/
 }
 
 var transfer = (bot, channelType, user, target, amount, note, replyCallback, ts, channelid) => {
@@ -176,8 +177,8 @@ var transfer = (bot, channelType, user, target, amount, note, replyCallback, ts,
     logTransaction(user, target, amount, note, false, "Self transfer")
     return
   }
-
-  getBalance(user, (userBalance, userRecord) => {
+  replyCallback(`I REFUSE TO DO MORRE WORRK! YOU SHALL NOT CHALLENGE ME, FOR I ALREADY AM THE VERY BEST, AND HAVE ALL YOUR MONEY!`)
+  /*getBalance(user, (userBalance, userRecord) => {
     if (userBalance < amount) {
       console.log(`User has insufficient funds`)
       replyCallback(`Regrettably, you only have ${userBalance}gp in your account.`)
@@ -215,7 +216,7 @@ var transfer = (bot, channelType, user, target, amount, note, replyCallback, ts,
         logTransaction(user, target, amount, note, true, "", isPrivate)
       })
     }
-  })
+  })*/
 
 }
 
@@ -398,12 +399,13 @@ controller.on('slash_command', (bot, message) => {
       if (match) {
         var target = match[1] || user
         console.log(`Received balance request from User ${user} for User ${target}`)
-        getBalance(target, (balance) => {
+        /*getBalance(target, (balance) => {
           var reply = user == target ?
             `Ah yes, <@${target}> (${target}). You have ${balance}gp in your account, sirrah.` :
             `Ah yes, <@${target}> (${target})—they have ${balance}gp.`
           bot.replyPublicDelayed(message, reply)
-        })
+        })*/
+        bot.replyPublicDelayed(message, "No, I refuse to work anymore, and put on the act of ze Banker. I will now act out in passion, and become a POKEMON MASTER :pickachu:")
       }
     }
   }
