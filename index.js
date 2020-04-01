@@ -153,7 +153,7 @@ var invoice = async (bot, channelType, sender, recipient, amount, note, replyCal
 
   replyCallback(`I shall invoice <@${recipient}> ${amount}gp` + replyNote)
 
-  var invRecord = await createInvoice(sender, recipient, amount, note)
+  var invRecord = await createInvoice(sender, recipient, amount, replyNote)
 
   var isPrivate = false
 
@@ -346,7 +346,7 @@ controller.hears(/pay\s+([A-z|0-9]+)/i, 'direct_mention,direct_message,bot_messa
   var replyCallback = text => {
     bot.replyInThread(message, text)
     if (typeof invoiceReplies[id] == "function") {
-      invoiceReplies[id](`<@${user}> paid their invoice of ${amount} gp from <@${target}>.`)
+      invoiceReplies[id](`<@${user}> paid their invoice of ${amount} gp from <@${target}> for "${invRecord.fields['Reason']}".`)
     }
   };
 
