@@ -286,9 +286,10 @@ controller.hears(/give\s+<@([A-z|0-9]+)>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/i, 
   var target = message.match[1]
   var amount = message.match[2]
   var note = message.match[3] || ''
+
   var replyCallback = text => bot.replyInThread(message, text)
-  replyCallback("No, I refuse to work anymore, and put on the act of ze Banker. I will now act out in passion, and become a POKEMON MASTER :pickachu:")
-  // transfer(bot, event['channel_type'], user, target, amount, note, replyCallback, ts, channel)*/
+
+  transfer(bot, event['channel_type'], user, target, amount, note, replyCallback, ts, channel)
 })
 
 // @bot invoice @zrl 100 for stickers --> Creates invoice for 100gp & notifies @zrl
@@ -313,8 +314,7 @@ controller.hears(/invoice\s+<@([A-z|0-9]+)>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/
   var note = message.match[3] || ''
 
   var replyCallback = text => bot.replyInThread(message, text)
-  replyCallback("No, I refuse to work anymore, and put on the act of ze Banker. I will now act out in passion, and become a POKEMON MASTER :pickachu:")
-  //  invoice(bot, event['channel_type'], user, target, amount, note, replyCallback, ts, channel)
+  invoice(bot, event['channel_type'], user, target, amount, note, replyCallback, ts, channel)
 })
 
 // @bot pay rec182yhe902 --> pays an invoice
