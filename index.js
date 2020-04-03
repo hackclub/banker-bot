@@ -404,15 +404,15 @@ controller.on('slash_command', (bot, message) => {
             `Ah yes, <@${target}> (${target})—they have ${balance}gp.`
           bot.replyPublicDelayed(message, { blocks: [
             {
+              type: 'section',
+              text: {
+                type: 'mrkdwn',
+                text: reply
+              }
+            },
+            {
               type: 'context',
               elements: [ 
-                {
-                  type: 'section',
-                  text: {
-                    type: 'mrkdwn',
-                    text: reply,
-                  },
-                }, 
                 {
                   type: 'mrkdwn',
                   text: `Requested by <@${user}>`
