@@ -402,7 +402,24 @@ controller.on('slash_command', (bot, message) => {
           var reply = user == target ?
             `Ah yes, <@${target}> (${target}). You have ${balance}gp in your account, sirrah.` :
             `Ah yes, <@${target}> (${target})—they have ${balance}gp.`
-          bot.replyPublicDelayed(message, reply)
+          bot.replyPublicDelayed(message, { blocks: [
+            {
+              type: 'context',
+              elements: [ 
+                {
+                  type: 'section',
+                  text: {
+                    type: 'mrkdwn',
+                    text: reply,
+                  },
+                }, 
+                {
+                  type: 'mrkdwn',
+                  text: `Requested by <@${user}>`
+                }
+              ]
+            }
+          ]})
         })
       }
     }
