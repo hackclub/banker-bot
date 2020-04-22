@@ -1,9 +1,9 @@
-var Botkit = require("botkit");
-var Airtable = require("airtable");
-var _ = require("lodash");
-var fs = require("fs");
+var Botkit = require('botkit');
+var Airtable = require('airtable');
+var _ = require('lodash');
+var fs = require('fs');
 
-var rawData = fs.readFileSync("data.json");
+var rawData = fs.readFileSync('data.json');
 var data = JSON.parse(rawData);
 
 var base = new Airtable({
@@ -13,18 +13,18 @@ var base = new Airtable({
 var redisConfig = {
   url: process.env.REDISCLOUD_URL,
 };
-var redisStorage = require("botkit-storage-redis")(redisConfig);
+var redisStorage = require('botkit-storage-redis')(redisConfig);
 
 var startBalance = 0;
 
 var invoiceReplies = {};
 
-console.log("Booting bank bot");
+console.log('Booting bank bot');
 
 function createBalance(user, cb = () => {}) {
   console.log(`Creating balance for User ${user}`);
 
-  base("bank").create(
+  base('bank').create(
     {
       User: user,
       Balance: startBalance,
@@ -44,7 +44,7 @@ function createBalance(user, cb = () => {}) {
 function setBalance(id, balance, cb = () => {}) {
   console.log(`Setting balance for Record ${id} to ${balance}`);
 
-  base("bank").update(
+  base('bank').update(
     id,
     {
       Balance: balance,
@@ -63,7 +63,7 @@ function setBalance(id, balance, cb = () => {}) {
 function getBalance(user, cb = () => {}) {
   console.log(`Retrieving balance for User ${user}`);
 
-  base("bank")
+  base('bank')
     .select({
       filterByFormula: `User = "${user}"`,
     })
@@ -79,7 +79,7 @@ function getBalance(user, cb = () => {}) {
       } else {
         var record = records[0];
         var fields = record.fields;
-        var balance = fields["Balance"];
+        var balance = fields['Balance'];
         console.log(`Balance for User ${user} is ${balance}`);
         console.log(fields);
         cb(balance, record);
@@ -89,7 +89,7 @@ function getBalance(user, cb = () => {}) {
 
 function getInvoice(id) {
   return new Promise((resolve, reject) => {
-    base("invoices").find(id, (err, record) => {
+    base('invoices').find(id, (err, record) => {
       if (err) {
         console.error(err);
         reject(err);
@@ -99,13 +99,13 @@ function getInvoice(id) {
   });
 }
 
-console.log("Booting banker bot");
+console.log('Booting banker bot');
 
 var controller = Botkit.slackbot({
   clientId: process.env.SLACK_CLIENT_ID,
   clientSecret: process.env.SLACK_CLIENT_SECRET,
   clientSigningSecret: process.env.SLACK_CLIENT_SIGNING_SECRET,
-  scopes: ["bot", "chat:write:bot"],
+  scopes: ['bot', 'chat:write:bot'],
   storage: redisStorage,
 });
 
@@ -133,7 +133,7 @@ function matchData(str, pattern, keys, obj = {}) {
 var balancePattern = /^balance(?:\s+<@([A-z|0-9]+)>)?/i;
 controller.hears(
   balancePattern.source,
-  "direct_mention,direct_message,bot_message",
+  'direct_mention,direct_message,bot_message',
   (bot, message) => {
     var { text, user } = message;
     var captures = balancePattern.exec(text);
@@ -172,7 +172,7 @@ var invoice = async (
     return;
   }
 
-  var replyNote = note ? ` for "${note}".` : ".";
+  var replyNote = note ? ` for "${note}".` : '.';
 
   replyCallback(`I shall invoice <@${recipient}> ${amount}gp` + replyNote);
 
@@ -183,8 +183,8 @@ var invoice = async (
   invoiceReplies[invRecord.id] = replyCallback;
 
   bot.say({
-    user: "@" + recipient,
-    channel: "@" + recipient,
+    user: '@' + recipient,
+    channel: '@' + recipient,
     text: `Good morrow sirrah. <@${sender}> has just sent you an invoice of ${amount}gp${replyNote}
        Reply with "@banker pay ${invRecord.id}".`,
   });
@@ -205,7 +205,7 @@ var transfer = (
     console.log(`${user} attempting to transfer to theirself`);
     replyCallback(`What are you trying to pull here, <@${user}>?`);
 
-    logTransaction(user, target, amount, note, false, "Self transfer");
+    logTransaction(user, target, amount, note, false, 'Self transfer');
     return;
   }
 
@@ -216,14 +216,14 @@ var transfer = (
         `Regrettably, you only have ${userBalance}gp in your account.`
       );
 
-      logTransaction(user, target, amount, note, false, "Insufficient funds");
+      logTransaction(user, target, amount, note, false, 'Insufficient funds');
     } else {
       getBalance(target, (targetBalance, targetRecord) => {
         setBalance(userRecord.id, userBalance - amount);
         // Treats targetBalance+amount as a string concatenation. WHY???
         setBalance(targetRecord.id, targetBalance - -amount);
 
-        var replyNote = note ? ` for "${note}".` : ".";
+        var replyNote = note ? ` for "${note}".` : '.';
 
         replyCallback(
           `I shall transfer ${amount}gp to <@${target}> immediately` + replyNote
@@ -231,10 +231,10 @@ var transfer = (
 
         var isPrivate = false;
 
-        if (channelType == "im") {
+        if (channelType == 'im') {
           bot.say({
-            user: "@" + target,
-            channel: "@" + target,
+            user: '@' + target,
+            channel: '@' + target,
             text: `Good morrow sirrah. <@${user}> has just transferred ${amount}gp to your account${replyNote}`,
           });
 
@@ -242,13 +242,13 @@ var transfer = (
         } else if (data.bots.includes(target)) {
           // send clean, splittable data string
           bot.say({
-            user: "@" + target,
-            channel: "@" + target,
+            user: '@' + target,
+            channel: '@' + target,
             text: `$$$ | <@${user}> | ${amount} | ${replyNote} | ${channelid} | ${ts}`,
           });
         }
 
-        logTransaction(user, target, amount, note, true, "", isPrivate);
+        logTransaction(user, target, amount, note, true, '', isPrivate);
       });
     }
   });
@@ -261,14 +261,14 @@ function logTransaction(u, t, a, n, s, m, p) {
 
   console.log(parseInt(a));
 
-  base("ledger").create(
+  base('ledger').create(
     {
       From: u,
       To: t,
       Amount: parseInt(a),
       Note: n,
       Success: s,
-      "Admin Note": m,
+      'Admin Note': m,
       Timestamp: Date.now(),
       Private: p,
     },
@@ -277,7 +277,7 @@ function logTransaction(u, t, a, n, s, m, p) {
         console.error(err);
         return;
       }
-      console.log("New ledger transaction logged: " + record.getId());
+      console.log('New ledger transaction logged: ' + record.getId());
     }
   );
 }
@@ -285,7 +285,7 @@ function logTransaction(u, t, a, n, s, m, p) {
 // log invoice on airtable
 function createInvoice(sender, recipient, amount, note) {
   return new Promise((resolve, reject) => {
-    base("invoices").create(
+    base('invoices').create(
       {
         From: sender,
         To: recipient,
@@ -297,7 +297,7 @@ function createInvoice(sender, recipient, amount, note) {
           console.error(err);
           reject(err);
         }
-        console.log("New invoice created:", record.getId());
+        console.log('New invoice created:', record.getId());
         resolve(record);
       }
     );
@@ -307,27 +307,27 @@ function createInvoice(sender, recipient, amount, note) {
 // @bot give @zrl 100 --> Gives 100gp from my account to zrl's
 controller.hears(
   /give\s+<@([A-z|0-9]+)>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/i,
-  "direct_mention,direct_message,bot_message",
+  'direct_mention,direct_message,bot_message',
   (bot, message) => {
     // console.log(message)
     var { text, user, event, ts, channel } = message;
     if (message.thread_ts) {
       ts = message.thread_ts;
     }
-    if (message.type == "bot_message" && !data.bots.includes(user)) return;
+    if (message.type == 'bot_message' && !data.bots.includes(user)) return;
 
     console.log(`Processing give request from ${user}`);
     console.log(message);
 
     var target = message.match[1];
     var amount = message.match[2];
-    var note = message.match[3] || "";
+    var note = message.match[3] || '';
 
     var replyCallback = (text) => bot.replyInThread(message, text);
 
     transfer(
       bot,
-      event["channel_type"],
+      event['channel_type'],
       user,
       target,
       amount,
@@ -343,24 +343,24 @@ controller.hears(
 
 controller.hears(
   /invoice\s+<@([A-z|0-9]+)>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/i,
-  "direct_mention,direct_message,bot_message",
+  'direct_mention,direct_message,bot_message',
   (bot, message) => {
     var { text, user, event, ts, channel } = message;
     if (message.thread_ts) {
       ts = message.thread_ts;
     }
-    if (message.type == "bot_message" && !data.bots.includes(user)) return;
+    if (message.type == 'bot_message' && !data.bots.includes(user)) return;
 
     console.log(`Processing invoice request from ${user}`);
 
     var target = message.match[1];
     var amount = message.match[2];
-    var note = message.match[3] || "";
+    var note = message.match[3] || '';
 
     var replyCallback = (text) => bot.replyInThread(message, text);
     invoice(
       bot,
-      event["channel_type"],
+      event['channel_type'],
       user,
       target,
       amount,
@@ -376,30 +376,30 @@ controller.hears(
 
 controller.hears(
   /pay\s+([A-z|0-9]+)/i,
-  "direct_mention,direct_message,bot_message",
+  'direct_mention,direct_message,bot_message',
   async (bot, message) => {
     var { text, user, event, ts, channel } = message;
     if (message.thread_ts) {
       ts = message.thread_ts;
     }
-    if (message.type == "bot_message" && !data.bots.includes(user)) return;
+    if (message.type == 'bot_message' && !data.bots.includes(user)) return;
 
     console.log(`Processing invoice payment from ${user}`);
 
     var id = message.match[1];
     var invRecord = await getInvoice(id);
 
-    if (invRecord.fields["Paid"]) {
+    if (invRecord.fields['Paid']) {
       bot.replyInThread(message, "You've already paid this invoice!");
     }
-    var amount = invRecord.fields["Amount"];
-    var target = invRecord.fields["From"];
+    var amount = invRecord.fields['Amount'];
+    var target = invRecord.fields['From'];
     var note = `for invoice ${invRecord.id}`;
     var replyCallback = (text) => {
       bot.replyInThread(message, text);
-      if (typeof invoiceReplies[id] == "function") {
+      if (typeof invoiceReplies[id] == 'function') {
         invoiceReplies[id](
-          `<@${user}> paid their invoice of ${amount} gp from <@${target}>${invRecord.fields["Reason"]}`
+          `<@${user}> paid their invoice of ${amount} gp from <@${target}>${invRecord.fields['Reason']}`
         );
       }
     };
@@ -418,7 +418,7 @@ controller.hears(
   }
 );
 
-controller.on("slash_command", (bot, message) => {
+controller.on('slash_command', (bot, message) => {
   var { command, text, user_id, ts, channel } = message;
   var user = user_id;
   console.log(`Slash command received from ${user_id}: ${text}`);
@@ -432,29 +432,29 @@ controller.on("slash_command", (bot, message) => {
       "Just fyi... You're talking to me already... no need for slash commands to summon me!"
     );
   } else {
-    if (command == "/give") {
+    if (command == '/give') {
       var pattern = /<@([A-z|0-9]+)\|.+>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/;
       var match = pattern.exec(text);
       if (match) {
         var target = match[1];
         var amount = match[2];
-        var note = match[3] || "";
+        var note = match[3] || '';
 
         var replyCallback = (text) =>
           bot.replyPublicDelayed(message, {
             blocks: [
               {
-                type: "section",
+                type: 'section',
                 text: {
-                  type: "mrkdwn",
+                  type: 'mrkdwn',
                   text: text,
                 },
               },
               {
-                type: "context",
+                type: 'context',
                 elements: [
                   {
-                    type: "mrkdwn",
+                    type: 'mrkdwn',
                     text: `Requested by <@${user_id}>`,
                   },
                 ],
@@ -464,7 +464,7 @@ controller.on("slash_command", (bot, message) => {
 
         transfer(
           bot,
-          "public",
+          'public',
           user_id,
           target,
           amount,
@@ -476,12 +476,12 @@ controller.on("slash_command", (bot, message) => {
       } else {
         bot.replyPrivateDelayed(
           message,
-          "I do not understand! Please type your message as `/give @user [positive-amount]gp for [reason]`"
+          'I do not understand! Please type your message as `/give @user [positive-amount]gp for [reason]`'
         );
       }
     }
 
-    if (command == "/balance") {
+    if (command == '/balance') {
       var pattern = /(?:<@([A-z|0-9]+)\|.+>)?/i;
       var match = pattern.exec(text);
       if (match) {
@@ -497,17 +497,17 @@ controller.on("slash_command", (bot, message) => {
           bot.replyPublicDelayed(message, {
             blocks: [
               {
-                type: "section",
+                type: 'section',
                 text: {
-                  type: "mrkdwn",
+                  type: 'mrkdwn',
                   text: reply,
                 },
               },
               {
-                type: "context",
+                type: 'context',
                 elements: [
                   {
-                    type: "mrkdwn",
+                    type: 'mrkdwn',
                     text: `Requested by <@${user}>`,
                   },
                 ],
@@ -520,12 +520,12 @@ controller.on("slash_command", (bot, message) => {
   }
 });
 
-controller.hears(".*", "direct_mention,direct_message", (bot, message) => {
+controller.hears('.*', 'direct_mention,direct_message', (bot, message) => {
   var { text, user } = message;
   console.log(`Received unhandled message from User ${user}:\n${text}`);
 
   // Ignore if reply is in a thread. Hack to work around infinite bot loops.
-  if (_.has(message.event, "parent_user_id")) return;
+  if (_.has(message.event, 'parent_user_id')) return;
 
-  bot.replyInThread(message, "Pardon me, but I do not understand.");
+  bot.replyInThread(message, 'Pardon me, but I do not understand.');
 });
