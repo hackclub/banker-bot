@@ -455,7 +455,7 @@ controller.on('slash_command', (bot, message) => {
                 elements: [
                   {
                     type: 'mrkdwn',
-                    text: `Requested by <@${user_id}>`,
+                    text: `Transferred by <@${user_id}>`,
                   },
                 ],
               },
