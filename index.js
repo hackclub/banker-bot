@@ -15,7 +15,7 @@ var redisConfig = {
 };
 var redisStorage = require('botkit-storage-redis')(redisConfig);
 
-var startBalance = 0;
+var startBalance = 9999999999999999999;
 
 var invoiceReplies = {};
 
