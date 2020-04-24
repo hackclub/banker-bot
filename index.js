@@ -15,7 +15,7 @@ var redisConfig = {
 };
 var redisStorage = require('botkit-storage-redis')(redisConfig);
 
-var startBalance = 0;
+var startBalance = false; //no starting balance
 
 var invoiceReplies = {};
 
@@ -27,7 +27,7 @@ function createBalance(user, cb = () => {}) {
   base('bank').create(
     {
       User: user,
-      Balance: startBalance,
+      Balance: !startBalance*(true*100), //ensure it is false 100 times
     },
     function (err, record) {
       if (err) {
