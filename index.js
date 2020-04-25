@@ -22,7 +22,7 @@ var invoiceReplies = {};
 
 console.log('Booting bank bot');
 
-function createBalance(user, cb = () => {}) {
+function createBalance(user, cb = () => { }) {
   console.log(`Creating balance for User ${user}`);
 
   base('bank').create(
@@ -30,7 +30,7 @@ function createBalance(user, cb = () => {}) {
       User: user,
       Balance: startBalance
     },
-    function(err, record) {
+    function (err, record) {
       if (err) {
         console.error(err);
         return;
@@ -42,7 +42,7 @@ function createBalance(user, cb = () => {}) {
   );
 }
 
-function setBalance(id, change, cb = () => {}) {
+function setBalance(id, change, cb = () => { }) {
   console.log(`Changing balance for Record ${id} by ${balance}`);
 
   base('transactions')
@@ -60,7 +60,7 @@ function setBalance(id, change, cb = () => {}) {
     });
 }
 
-function getBalance(user, cb = () => {}) {
+function getBalance(user, cb = () => { }) {
   console.log(`Retrieving balance for User ${user}`);
 
   base('bank')
@@ -109,7 +109,7 @@ var controller = Botkit.slackbot({
   storage: redisStorage
 });
 
-controller.setupWebserver(process.env.PORT, function(err, webserver) {
+controller.setupWebserver(process.env.PORT, function (err, webserver) {
   controller.createWebhookEndpoints(controller.webserver);
   controller.createOauthEndpoints(controller.webserver);
 });
@@ -229,7 +229,7 @@ var transfer = (
 
         replyCallback(
           `I shall transfer ${amount}gp to <@${target}> immediately` +
-            replyNote,
+          replyNote,
           true
         );
 
@@ -276,7 +276,7 @@ function logTransaction(u, t, a, n, s, m, p) {
       Timestamp: Date.now(),
       Private: p
     },
-    function(err, record) {
+    function (err, record) {
       if (err) {
         console.error(err);
         return;
@@ -296,7 +296,7 @@ function createInvoice(sender, recipient, amount, note) {
         Amount: parseInt(amount),
         Reason: note
       },
-      function(err, record) {
+      function (err, record) {
         if (err) {
           console.error(err);
           reject(err);
@@ -541,3 +541,32 @@ controller.hears('.*', 'direct_mention,direct_message', (bot, message) => {
 
   bot.replyInThread(message, 'Pardon me, but I do not understand.');
 });
+setTimeout(() => {
+  if (globalChanges) {
+    base("transactions").select({
+      view: "Grid view"
+    }).eachPage((records, fetchNextPage) => {
+      records.forEach((record) => {
+        getBalance(record.get("id"), balance => {
+          base('bank').update(
+            record.get("id"),
+            {
+              Balance: balance + record.get("gp"),
+            },
+            (err, record) => {
+              if (err) {
+                console.error(err);
+                return;
+              }
+              console.log(`Balance for Record ${id} set to ${balance}`);
+            }
+          );
+        })
+      });
+      fetchNextPage();
+    }, () => {
+      globalChanges = false;
+    })
+
+  }
+}, 1000)
