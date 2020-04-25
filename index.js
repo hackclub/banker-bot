@@ -45,18 +45,17 @@ function createBalance(user, cb = () => { }) {
 function setBalance(id, change, cb = () => { }) {
   console.log(`Changing balance for Record ${id} by ${change}`);
 
-  base('transactions')
-    .create([
-      {
-        fields: {
-          id: id,
-          gp: change
-        }
+  base('transactions').create([
+    {
+      "fields": {
+        "id": String(id),
+        "gp": change
       }
-    ], (e, d) => {
-      globalChanges = true;
-      console.log(`set global change var. err is ${e}`);
-    })
+    }
+  ], (e, d) => {
+    globalChanges = true;
+    console.log(`set global change var. err is ${e}`);
+  })
 }
 
 function getBalance(user, cb = () => { }) {
@@ -540,7 +539,7 @@ controller.hears('.*', 'direct_mention,direct_message', (bot, message) => {
 
   bot.replyInThread(message, 'Pardon me, but I do not understand.');
 });
-setTimeout(() => {
+setInterval(() => {
   if (globalChanges) {
     console.log("detected a transaction in queue")
     base("transactions").select({
