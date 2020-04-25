@@ -53,11 +53,10 @@ function setBalance(id, change, cb = () => { }) {
           gp: change
         }
       }
-    ])
-    .then(d => {
+    ], d => {
       globalChanges = true;
       console.log('set global change var');
-    });
+    })
 }
 
 function getBalance(user, cb = () => { }) {
