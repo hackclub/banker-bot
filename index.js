@@ -59,7 +59,7 @@ function setBalance(id, balance, cb = () => { }) {
             return;
           }
           console.log(`Balance for Record ${id} set to ${balance}`);
-          clearInterval(arayIntervals[0])
+          clearInterval(arrayIntervals[0])
           cb(balance, record);
         }
       );
