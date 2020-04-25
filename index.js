@@ -46,6 +46,7 @@ function createBalance(user, cb = () => { }) {
 function setBalance(id, balance, cb = () => { }) {
   console.log(`Setting balance for Record ${id} to ${balance}`);
   arrayIntervals.push(setInterval(() => {
+    console.log(`Global variable is ${globalChanges}`)
     if (!globalChanges) {
       globalChanges = true;
       base('bank').update(
@@ -53,15 +54,15 @@ function setBalance(id, balance, cb = () => { }) {
         {
           Balance: balance,
         },
-        function (err, record) {
+        (err, record) => {
           if (err) {
             console.error(err);
             return;
           }
           console.log(`Balance for Record ${id} set to ${balance}`);
           clearInterval(arrayIntervals[0])
-          globalChanges = false
           cb(balance, record);
+          globalChanges = false
         }
       );
     }
