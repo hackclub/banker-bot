@@ -57,6 +57,7 @@ function setBalance(id, balance, cb = () => { }) {
         (err, record) => {
           if (err) {
             console.error(err);
+            globalChanges = false
             return;
           }
           console.log(`Balance for Record ${id} set to ${balance}`);
