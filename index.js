@@ -550,7 +550,7 @@ setInterval(() => {
           base('bank').update(
             record.get("id"),
             {
-              Balance: balance + record.get("gp"),
+              Balance: balance + parseInt(record.get("gp")),
             },
             (err, record) => {
               if (err) {
