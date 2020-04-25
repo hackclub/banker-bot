@@ -232,7 +232,7 @@ var transfer = (
       getBalance(target, (targetBalance, targetRecord) => {
         setBalance(userRecord.id, parseInt(userBalance) - amount);
         // Treats targetBalance+amount as a string concatenation. WHY???
-        setBalance(targetRecord.id, parseInt(targetBalance) + amount);
+        setBalance(targetRecord.id, targetBalance - (-amount));
 
         var replyNote = note ? ` for "${note}".` : '.';
 
