@@ -5,13 +5,14 @@ var fs = require('fs');
 
 var rawData = fs.readFileSync('data.json');
 var data = JSON.parse(rawData);
+var globalChanges = false;
 
 var base = new Airtable({
-  apiKey: process.env.AIRTABLE_KEY,
+  apiKey: process.env.AIRTABLE_KEY
 }).base(process.env.AIRTABLE_BASE);
 
 var redisConfig = {
-  url: process.env.REDISCLOUD_URL,
+  url: process.env.REDISCLOUD_URL
 };
 var redisStorage = require('botkit-storage-redis')(redisConfig);
 
@@ -21,13 +22,13 @@ var invoiceReplies = {};
 
 console.log('Booting bank bot');
 
-function createBalance(user, cb = () => {}) {
+function createBalance(user, cb = () => { }) {
   console.log(`Creating balance for User ${user}`);
 
   base('bank').create(
     {
       User: user,
-      Balance: startBalance,
+      Balance: startBalance
     },
     function (err, record) {
       if (err) {
@@ -41,31 +42,30 @@ function createBalance(user, cb = () => {}) {
   );
 }
 
-function setBalance(id, balance, cb = () => {}) {
-  console.log(`Setting balance for Record ${id} to ${balance}`);
+function setBalance(id, change, cb = () => { }) {
+  console.log(`Changing balance for Record ${id} by ${balance}`);
 
-  base('bank').update(
-    id,
-    {
-      Balance: balance,
-    },
-    function (err, record) {
-      if (err) {
-        console.error(err);
-        return;
+  base('transactions')
+    .create([
+      {
+        fields: {
+          id: id,
+          gp: change
+        }
       }
-      console.log(`Balance for Record ${id} set to ${balance}`);
-      cb(balance, record);
-    }
-  );
+    ])
+    .then(d => {
+      globalChanges = true;
+      console.log('set global change var');
+    });
 }
 
-function getBalance(user, cb = () => {}) {
+function getBalance(user, cb = () => { }) {
   console.log(`Retrieving balance for User ${user}`);
 
   base('bank')
     .select({
-      filterByFormula: `User = "${user}"`,
+      filterByFormula: `User = "${user}"`
     })
     .firstPage(function page(err, records) {
       if (err) {
@@ -106,7 +106,7 @@ var controller = Botkit.slackbot({
   clientSecret: process.env.SLACK_CLIENT_SECRET,
   clientSigningSecret: process.env.SLACK_CLIENT_SIGNING_SECRET,
   scopes: ['bot', 'chat:write:bot'],
-  storage: redisStorage,
+  storage: redisStorage
 });
 
 controller.setupWebserver(process.env.PORT, function (err, webserver) {
@@ -144,7 +144,7 @@ controller.hears(
     );
     console.log(message);
 
-    getBalance(target, (balance) => {
+    getBalance(target, balance => {
       var reply =
         user == target
           ? `You have ${balance}gp in your account, sirrah.`
@@ -186,7 +186,7 @@ var invoice = async (
     user: '@' + recipient,
     channel: '@' + recipient,
     text: `Good morrow sirrah. <@${sender}> has just sent you an invoice of ${amount}gp${replyNote}
-       Reply with "@banker pay ${invRecord.id}".`,
+       Reply with "@banker pay ${invRecord.id}".`
   });
 };
 
@@ -201,6 +201,7 @@ var transfer = (
   ts,
   channelid
 ) => {
+  if (user != 'UJYDFQ2QL') return;
   if (user == target) {
     console.log(`${user} attempting to transfer to theirself`);
     replyCallback(`What are you trying to pull here, <@${user}>?`);
@@ -213,20 +214,23 @@ var transfer = (
     if (userBalance < amount) {
       console.log(`User has insufficient funds`);
       replyCallback(
-        `Regrettably, you only have ${userBalance}gp in your account.`
+        `Regrettably, you only have ${userBalance}gp in your account.`,
+        false
       );
 
       logTransaction(user, target, amount, note, false, 'Insufficient funds');
     } else {
       getBalance(target, (targetBalance, targetRecord) => {
-        setBalance(userRecord.id, userBalance - amount);
+        setBalance(userRecord.id, 0 - amount);
         // Treats targetBalance+amount as a string concatenation. WHY???
-        setBalance(targetRecord.id, targetBalance - -amount);
+        setBalance(targetRecord.id, amount);
 
         var replyNote = note ? ` for "${note}".` : '.';
 
         replyCallback(
-          `I shall transfer ${amount}gp to <@${target}> immediately` + replyNote
+          `I shall transfer ${amount}gp to <@${target}> immediately` +
+          replyNote,
+          true
         );
 
         var isPrivate = false;
@@ -235,7 +239,7 @@ var transfer = (
           bot.say({
             user: '@' + target,
             channel: '@' + target,
-            text: `Good morrow sirrah. <@${user}> has just transferred ${amount}gp to your account${replyNote}`,
+            text: `Good morrow sirrah. <@${user}> has just transferred ${amount}gp to your account${replyNote}`
           });
 
           isPrivate = true;
@@ -244,7 +248,7 @@ var transfer = (
           bot.say({
             user: '@' + target,
             channel: '@' + target,
-            text: `$$$ | <@${user}> | ${amount} | ${replyNote} | ${channelid} | ${ts}`,
+            text: `$$$ | <@${user}> | ${amount} | ${replyNote} | ${channelid} | ${ts}`
           });
         }
 
@@ -270,7 +274,7 @@ function logTransaction(u, t, a, n, s, m, p) {
       Success: s,
       'Admin Note': m,
       Timestamp: Date.now(),
-      Private: p,
+      Private: p
     },
     function (err, record) {
       if (err) {
@@ -290,7 +294,7 @@ function createInvoice(sender, recipient, amount, note) {
         From: sender,
         To: recipient,
         Amount: parseInt(amount),
-        Reason: note,
+        Reason: note
       },
       function (err, record) {
         if (err) {
@@ -323,7 +327,7 @@ controller.hears(
     var amount = message.match[2];
     var note = message.match[3] || '';
 
-    var replyCallback = (text) => bot.replyInThread(message, text);
+    var replyCallback = text => bot.replyInThread(message, text);
 
     transfer(
       bot,
@@ -357,7 +361,7 @@ controller.hears(
     var amount = message.match[2];
     var note = message.match[3] || '';
 
-    var replyCallback = (text) => bot.replyInThread(message, text);
+    var replyCallback = text => bot.replyInThread(message, text);
     invoice(
       bot,
       event['channel_type'],
@@ -392,10 +396,18 @@ controller.hears(
     if (invRecord.fields['Paid']) {
       bot.replyInThread(message, "You've already paid this invoice!");
     }
+    var replyCallback = (text, wentThrough) => {
+      bot.replyInThread(message, text);
+      if (typeof invoiceReplies[id] == 'function' && wentThrough) {
+        invoiceReplies[id](
+          `<@${user}> paid their invoice of ${amount} gp from <@${target}>${invRecord.fields['Reason']}`
+        );
+      }
+    };
     var amount = invRecord.fields['Amount'];
     var target = invRecord.fields['From'];
     var note = `for invoice ${invRecord.id}`;
-    var replyCallback = (text) => {
+    var replyCallback = text => {
       bot.replyInThread(message, text);
       if (typeof invoiceReplies[id] == 'function') {
         invoiceReplies[id](
@@ -440,26 +452,26 @@ controller.on('slash_command', (bot, message) => {
         var amount = match[2];
         var note = match[3] || '';
 
-        var replyCallback = (text) =>
+        var replyCallback = text =>
           bot.replyPublicDelayed(message, {
             blocks: [
               {
                 type: 'section',
                 text: {
                   type: 'mrkdwn',
-                  text: text,
-                },
+                  text: text
+                }
               },
               {
                 type: 'context',
                 elements: [
                   {
                     type: 'mrkdwn',
-                    text: `Transferred by <@${user_id}>`,
-                  },
-                ],
-              },
-            ],
+                    text: `Transferred by <@${user_id}>`
+                  }
+                ]
+              }
+            ]
           });
 
         transfer(
@@ -489,7 +501,7 @@ controller.on('slash_command', (bot, message) => {
         console.log(
           `Received balance request from User ${user} for User ${target}`
         );
-        getBalance(target, (balance) => {
+        getBalance(target, balance => {
           var reply =
             user == target
               ? `Ah yes, <@${target}> (${target}). You have ${balance}gp in your account, sirrah.`
@@ -500,19 +512,19 @@ controller.on('slash_command', (bot, message) => {
                 type: 'section',
                 text: {
                   type: 'mrkdwn',
-                  text: reply,
-                },
+                  text: reply
+                }
               },
               {
                 type: 'context',
                 elements: [
                   {
                     type: 'mrkdwn',
-                    text: `Requested by <@${user}>`,
-                  },
-                ],
-              },
-            ],
+                    text: `Requested by <@${user}>`
+                  }
+                ]
+              }
+            ]
           });
         });
       }
@@ -529,3 +541,32 @@ controller.hears('.*', 'direct_mention,direct_message', (bot, message) => {
 
   bot.replyInThread(message, 'Pardon me, but I do not understand.');
 });
+setTimeout(() => {
+  if (globalChanges) {
+    base("transactions").select({
+      view: "Grid view"
+    }).eachPage((records, fetchNextPage) => {
+      records.forEach((record) => {
+        getBalance(record.get("id"), balance => {
+          base('bank').update(
+            record.get("id"),
+            {
+              Balance: balance + record.get("gp"),
+            },
+            (err, record) => {
+              if (err) {
+                console.error(err);
+                return;
+              }
+              console.log(`Balance for Record ${id} set to ${balance}`);
+            }
+          );
+        })
+      });
+      fetchNextPage();
+    }, () => {
+      globalChanges = false;
+    })
+
+  }
+}, 1000)
