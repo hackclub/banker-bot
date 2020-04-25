@@ -6,6 +6,7 @@ var fs = require('fs');
 var rawData = fs.readFileSync('data.json');
 var data = JSON.parse(rawData);
 var globalChanges = false;
+var arayIntervals = []
 
 var base = new Airtable({
   apiKey: process.env.AIRTABLE_KEY
@@ -42,20 +43,28 @@ function createBalance(user, cb = () => { }) {
   );
 }
 
-function setBalance(id, change, cb = () => { }) {
-  console.log(`Changing balance for Record ${id} by ${change}`);
-
-  base('transactions').create([
-    {
-      "fields": {
-        "id": String(id),
-        "gp": change
-      }
+function setBalance(id, balance, cb = () => { }) {
+  console.log(`Setting balance for Record ${id} to ${balance}`);
+  arrayIntervals.push(setInterval(() => {
+    if (!globalChanges) {
+      globalChanges = true;
+      base('bank').update(
+        id,
+        {
+          Balance: balance,
+        },
+        function (err, record) {
+          if (err) {
+            console.error(err);
+            return;
+          }
+          console.log(`Balance for Record ${id} set to ${balance}`);
+          clearInterval(arayIntervals[0])
+          cb(balance, record);
+        }
+      );
     }
-  ], (e, d) => {
-    globalChanges = true;
-    console.log(`set global change var. err is ${e}`);
-  })
+  }, 1000))
 }
 
 function getBalance(user, cb = () => { }) {
@@ -539,33 +548,3 @@ controller.hears('.*', 'direct_mention,direct_message', (bot, message) => {
 
   bot.replyInThread(message, 'Pardon me, but I do not understand.');
 });
-setInterval(() => {
-  if (globalChanges) {
-    console.log("detected a transaction in queue")
-    base("transactions").select({
-      view: "Grid view"
-    }).eachPage((records, fetchNextPage) => {
-      records.forEach((record) => {
-        getBalance(record.get("id"), balance => {
-          base('bank').update(
-            record.get("id"),
-            {
-              Balance: balance + parseInt(record.get("gp")),
-            },
-            (err, record) => {
-              if (err) {
-                console.error(err);
-                return;
-              }
-              console.log(`Balance for Record ${id} set to ${balance}`);
-            }
-          );
-        })
-      });
-      fetchNextPage();
-    }, () => {
-      globalChanges = false;
-    })
-
-  }
-}, 1000)
