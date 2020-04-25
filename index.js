@@ -43,7 +43,7 @@ function createBalance(user, cb = () => { }) {
 }
 
 function setBalance(id, change, cb = () => { }) {
-  console.log(`Changing balance for Record ${id} by ${balance}`);
+  console.log(`Changing balance for Record ${id} by ${change}`);
 
   base('transactions')
     .create([
