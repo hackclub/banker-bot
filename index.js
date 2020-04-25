@@ -6,7 +6,7 @@ var fs = require('fs');
 var rawData = fs.readFileSync('data.json');
 var data = JSON.parse(rawData);
 var globalChanges = false;
-var arayIntervals = []
+var arrayIntervals = []
 
 var base = new Airtable({
   apiKey: process.env.AIRTABLE_KEY
