@@ -228,9 +228,9 @@ var transfer = (
       logTransaction(user, target, amount, note, false, 'Insufficient funds');
     } else {
       getBalance(target, (targetBalance, targetRecord) => {
-        setBalance(userRecord.id, 0 - amount);
+        setBalance(userRecord.id, userBalance - amount);
         // Treats targetBalance+amount as a string concatenation. WHY???
-        setBalance(targetRecord.id, amount);
+        setBalance(targetRecord.id, targetBalance + amount);
 
         var replyNote = note ? ` for "${note}".` : '.';
 
