@@ -53,9 +53,9 @@ function setBalance(id, change, cb = () => { }) {
           gp: change
         }
       }
-    ], d => {
+    ], (e, d) => {
       globalChanges = true;
-      console.log('set global change var');
+      console.log(`set global change var. err is ${e}`);
     })
 }
 
@@ -542,6 +542,7 @@ controller.hears('.*', 'direct_mention,direct_message', (bot, message) => {
 });
 setTimeout(() => {
   if (globalChanges) {
+    console.log("detected a transaction in queue")
     base("transactions").select({
       view: "Grid view"
     }).eachPage((records, fetchNextPage) => {
