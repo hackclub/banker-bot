@@ -56,6 +56,7 @@ function setBalance(id, balance, cb = () => { }) {
         },
         (err, record) => {
           clearInterval(arrayIntervals[0])
+          arrayIntervals.shift()
           globalChanges = false
           if (err) {
             console.error(err);
