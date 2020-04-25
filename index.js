@@ -60,6 +60,7 @@ function setBalance(id, balance, cb = () => { }) {
           }
           console.log(`Balance for Record ${id} set to ${balance}`);
           clearInterval(arrayIntervals[0])
+          globalChanges = false
           cb(balance, record);
         }
       );
