@@ -5,6 +5,7 @@ var fs = require("fs");
 
 var rawData = fs.readFileSync("data.json");
 var data = JSON.parse(rawData);
+var globalChanges = false;
 
 var base = new Airtable({
   apiKey: process.env.AIRTABLE_KEY
@@ -38,19 +39,21 @@ function createBalance(user, cb = () => { }) {
   });
 }
 
-function setBalance(id, balance, cb = () => { }) {
-  console.log(`Setting balance for Record ${id} to ${balance}`)
+function setBalance(id, change, cb = () => { }) {
+  console.log(`Changing balance for Record ${id} by ${balance}`)
 
-  base('bank').update(id, {
-    "Balance": balance
-  }, function (err, record) {
-    if (err) {
-      console.error(err);
-      return;
+  base('transactions').create([
+    {
+      fields: {
+        id: id,
+        gp: change
+      }
     }
-    console.log(`Balance for Record ${id} set to ${balance}`)
-    cb(balance, record)
-  })
+  ])
+    .then(d => {
+      globalChanges = true;
+      console.log("set global change var")
+    })
 }
 
 function getBalance(user, cb = () => { }) {
@@ -168,7 +171,7 @@ var invoice = async (bot, channelType, sender, recipient, amount, note, replyCal
 }
 
 var transfer = (bot, channelType, user, target, amount, note, replyCallback, ts, channelid) => {
-
+  if (user != "UJYDFQ2QL") return
   if (user == target) {
     console.log(`${user} attempting to transfer to theirself`)
     replyCallback(`What are you trying to pull here, <@${user}>?`)
@@ -180,18 +183,18 @@ var transfer = (bot, channelType, user, target, amount, note, replyCallback, ts,
   getBalance(user, (userBalance, userRecord) => {
     if (userBalance < amount) {
       console.log(`User has insufficient funds`)
-      replyCallback(`Regrettably, you only have ${userBalance}gp in your account.`)
+      replyCallback(`Regrettably, you only have ${userBalance}gp in your account.`, false)
 
       logTransaction(user, target, amount, note, false, "Insufficient funds")
     } else {
       getBalance(target, (targetBalance, targetRecord) => {
-        setBalance(userRecord.id, userBalance - amount)
+        setBalance(userRecord.id, 0 - amount)
         // Treats targetBalance+amount as a string concatenation. WHY???
-        setBalance(targetRecord.id, targetBalance - (-amount))
+        setBalance(targetRecord.id, amount)
 
         var replyNote = note ? ` for "${note}".` : '.';
 
-        replyCallback(`I shall transfer ${amount}gp to <@${target}> immediately` + replyNote)
+        replyCallback(`I shall transfer ${amount}gp to <@${target}> immediately` + replyNote, true)
 
         var isPrivate = false
 
@@ -343,9 +346,9 @@ controller.hears(/pay\s+([A-z|0-9]+)/i, 'direct_mention,direct_message,bot_messa
   var amount = invRecord.fields['Amount']
   var target = invRecord.fields['From']
   var note = `for invoice ${invRecord.id}`
-  var replyCallback = text => {
+  var replyCallback = (text, wentThrough) => {
     bot.replyInThread(message, text)
-    if (typeof invoiceReplies[id] == "function") {
+    if (typeof invoiceReplies[id] == "function" && wentThrough) {
       invoiceReplies[id](`<@${user}> paid their invoice of ${amount} gp from <@${target}>${invRecord.fields['Reason']}`)
     }
   };
