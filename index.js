@@ -213,7 +213,6 @@ var transfer = (
   ts,
   channelid
 ) => {
-  if (user != 'UJYDFQ2QL') return;
   if (user == target) {
     console.log(`${user} attempting to transfer to theirself`);
     replyCallback(`What are you trying to pull here, <@${user}>?`);
