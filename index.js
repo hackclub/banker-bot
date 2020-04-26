@@ -43,29 +43,31 @@ function createBalance(user, cb = () => { }) {
   );
 }
 
-function setBalance(id, balance, cb = () => { }) {
-  console.log(`Setting balance for Record ${id} to ${balance}`);
+function setBalance(id, amount, user, cb = () => { }) {
+  console.log(`Changing balance for Record ${id} by ${amount}`);
   arrayIntervals.push(setInterval(() => {
     console.log(`Global variable is ${globalChanges}`)
     if (!globalChanges) {
       globalChanges = true;
-      base('bank').update(
-        id,
-        {
-          Balance: balance,
-        },
-        (err, record) => {
-          clearInterval(arrayIntervals[0])
-          arrayIntervals.shift()
-          globalChanges = false
-          if (err) {
-            console.error(err);
-            return;
+      getBalance(user, bal => {
+        base('bank').update(
+          id,
+          {
+            Balance: bal + amount,
+          },
+          (err, record) => {
+            clearInterval(arrayIntervals[0])
+            arrayIntervals.shift()
+            globalChanges = false
+            if (err) {
+              console.error(err);
+              return;
+            }
+            console.log(`Balance for Record ${id} set to ${bal + amount}`);
+            cb(balance, record);
           }
-          console.log(`Balance for Record ${id} set to ${balance}`);
-          cb(balance, record);
-        }
-      );
+        );
+      })
     }
   }, 1000))
 }
@@ -231,9 +233,9 @@ var transfer = (
       logTransaction(user, target, amount, note, false, 'Insufficient funds');
     } else {
       getBalance(target, (targetBalance, targetRecord) => {
-        setBalance(userRecord.id, parseInt(userBalance) - amount);
+        setBalance(userRecord.id, - amount, user);
         // Treats targetBalance+amount as a string concatenation. WHY???
-        setBalance(targetRecord.id, targetBalance - (-amount));
+        setBalance(targetRecord.id, - (-amount), target);
 
         var replyNote = note ? ` for "${note}".` : '.';
 
