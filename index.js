@@ -1,29 +1,40 @@
-var Botkit = require('botkit');
-var Airtable = require('airtable');
-var _ = require('lodash');
-var fs = require('fs');
+const Botkit = require('botkit');
+const Airtable = require('airtable');
+const _ = require('lodash');
+const fs = require('fs');
 
-var rawData = fs.readFileSync('data.json');
-var data = JSON.parse(rawData);
-var globalChanges = false;
-var arrayIntervals = []
+const rawData = fs.readFileSync('data.json');
+const data = JSON.parse(rawData);
+const globalChanges = false;
+const arrayIntervals = []
 
-var base = new Airtable({
+const base = new Airtable({
   apiKey: process.env.AIRTABLE_KEY
 }).base(process.env.AIRTABLE_BASE);
 
-var redisConfig = {
+const redisConfig = {
   url: process.env.REDISCLOUD_URL
 };
-var redisStorage = require('botkit-storage-redis')(redisConfig);
+const redisStorage = require('botkit-storage-redis')(redisConfig);
+const startBalance = 0;
+const invoiceReplies = {};
 
-var startBalance = 0;
+const controller = Botkit.slackbot({
+  clientId: process.env.SLACK_CLIENT_ID,
+  clientSecret: process.env.SLACK_CLIENT_SECRET,
+  clientSigningSecret: process.env.SLACK_CLIENT_SIGNING_SECRET,
+  scopes: ['bot', 'chat:write:bot'],
+  storage: redisStorage
+});
 
-var invoiceReplies = {};
+controller.setupWebserver(process.env.PORT, function (err, webserver) {
+  controller.createWebhookEndpoints(controller.webserver);
+  controller.createOauthEndpoints(controller.webserver);
+});
 
 console.log('Booting bank bot');
 
-function createBalance(user, cb = () => { }) {
+const createBalance = (user, cb = () => { }) => {
   console.log(`Creating balance for User ${user}`);
 
   base('bank').create(
@@ -43,7 +54,7 @@ function createBalance(user, cb = () => { }) {
   );
 }
 
-function setBalance(id, amount, user, cb = () => { }) {
+const setBalance = (id, amount, user, cb = () => { }) => {
   console.log(`Changing balance for Record ${id} by ${amount}`);
   arrayIntervals.push(setInterval(() => {
     console.log(`Global variable is ${globalChanges}`)
@@ -72,7 +83,7 @@ function setBalance(id, amount, user, cb = () => { }) {
   }, 1000))
 }
 
-function getBalance(user, cb = () => { }) {
+const getBalance = (user, cb = () => { }) => {
   console.log(`Retrieving balance for User ${user}`);
 
   base('bank')
@@ -99,7 +110,7 @@ function getBalance(user, cb = () => { }) {
     });
 }
 
-function getInvoice(id) {
+const getInvoice = (id) => {
   return new Promise((resolve, reject) => {
     base('invoices').find(id, (err, record) => {
       if (err) {
@@ -111,22 +122,7 @@ function getInvoice(id) {
   });
 }
 
-console.log('Booting banker bot');
-
-var controller = Botkit.slackbot({
-  clientId: process.env.SLACK_CLIENT_ID,
-  clientSecret: process.env.SLACK_CLIENT_SECRET,
-  clientSigningSecret: process.env.SLACK_CLIENT_SIGNING_SECRET,
-  scopes: ['bot', 'chat:write:bot'],
-  storage: redisStorage
-});
-
-controller.setupWebserver(process.env.PORT, function (err, webserver) {
-  controller.createWebhookEndpoints(controller.webserver);
-  controller.createOauthEndpoints(controller.webserver);
-});
-
-function matchData(str, pattern, keys, obj = {}) {
+const matchData = (str, pattern, keys, obj = {}) => {
   var match = pattern.exec(str);
 
   if (match) {
@@ -142,14 +138,14 @@ function matchData(str, pattern, keys, obj = {}) {
 
 // @bot balance --> Returns my balance
 // @bot balance @zrl --> Returns zrl's balance
-var balancePattern = /^balance(?:\s+<@([A-z|0-9]+)>)?/i;
+const balancePattern = /^balance(?:\s+<@([A-z|0-9]+)>)?/i;
 controller.hears(
   balancePattern.source,
   'direct_mention,direct_message,bot_message',
   (bot, message) => {
-    var { text, user } = message;
-    var captures = balancePattern.exec(text);
-    var target = captures[1] || user;
+    const { text, user } = message;
+    const captures = balancePattern.exec(text);
+    const target = captures[1] || user;
 
     console.log(
       `Received balance request from User ${user} for User ${target}`
@@ -157,7 +153,7 @@ controller.hears(
     console.log(message);
 
     getBalance(target, balance => {
-      var reply =
+      const reply =
         user == target
           ? `You have ${balance}gp in your account, sirrah.`
           : `Ah yes, User <@${target}> (${target})—they have ${balance}gp.`;
@@ -166,7 +162,7 @@ controller.hears(
   }
 );
 
-var invoice = async (
+let invoice = async (
   bot,
   channelType,
   sender,
@@ -176,33 +172,33 @@ var invoice = async (
   replyCallback,
   ts,
   channelid
-) => {
-  if (sender == recipient) {
-    console.log(`${sender} attempting to invoice theirself`);
-    replyCallback(`What are you trying to pull here, <@${sender}>?`);
+  ) => {
+        if (sender == recipient) {
+            console.log(`${sender} attempting to invoice theirself`);
+            replyCallback(`What are you trying to pull here, <@${sender}>?`);
 
-    return;
-  }
+            return;
+        }
 
-  var replyNote = note ? ` for "${note}".` : '.';
+        var replyNote = note ? ` for "${note}".` : '.';
 
-  replyCallback(`I shall invoice <@${recipient}> ${amount}gp` + replyNote);
+        replyCallback(`I shall invoice <@${recipient}> ${amount}gp` + replyNote);
 
-  var invRecord = await createInvoice(sender, recipient, amount, replyNote);
+        var invRecord = await createInvoice(sender, recipient, amount, replyNote);
 
-  var isPrivate = false;
+        var isPrivate = false;
 
-  invoiceReplies[invRecord.id] = replyCallback;
+        invoiceReplies[invRecord.id] = replyCallback;
 
-  bot.say({
-    user: '@' + recipient,
-    channel: '@' + recipient,
-    text: `Good morrow sirrah. <@${sender}> has just sent you an invoice of ${amount}gp${replyNote}
-       Reply with "@banker pay ${invRecord.id}".`
-  });
-};
+        bot.say({
+            user: '@' + recipient,
+            channel: '@' + recipient,
+            text: `Good morrow sirrah. <@${sender}> has just sent you an invoice of ${amount}gp${replyNote}
+            Reply with "@banker pay ${invRecord.id}".`
+            });
+        };
 
-var transfer = (
+let transfer = (
   bot,
   channelType,
   user,
@@ -214,7 +210,7 @@ var transfer = (
   channelid
 ) => {
   if (user == target) {
-    console.log(`${user} attempting to transfer to theirself`);
+    console.log(`${user} attempting to transfer to themself`);
     replyCallback(`What are you trying to pull here, <@${user}>?`);
 
     logTransaction(user, target, amount, note, false, 'Self transfer');
@@ -232,8 +228,8 @@ var transfer = (
       logTransaction(user, target, amount, note, false, 'Insufficient funds');
     } else {
       getBalance(target, (targetBalance, targetRecord) => {
+        //"Treats targetBalance+amount as a string concatenation. WHY???"
         setBalance(userRecord.id, - amount, user);
-        // Treats targetBalance+amount as a string concatenation. WHY???
         setBalance(targetRecord.id, - (-amount), target);
 
         var replyNote = note ? ` for "${note}".` : '.';
@@ -271,21 +267,22 @@ var transfer = (
 
 // log transactions in ledger
 // parameters: user, target, amount, note, success, log message, private
-function logTransaction(u, t, a, n, s, m, p) {
-  if (p === undefined) p = false;
+let logTransaction = (user, target, amount, note, success, logMessage, private) => {
+  if (private === undefined) 
+    private = false;
 
-  console.log(parseInt(a));
+  console.log(parseInt(amount));
 
   base('ledger').create(
     {
-      From: u,
-      To: t,
-      Amount: parseInt(a),
-      Note: n,
-      Success: s,
-      'Admin Note': m,
+      From: user,
+      To: target,
+      Amount: parseInt(amount),
+      Note: note,
+      Success: success,
+      'Admin Note': logMessage,
       Timestamp: Date.now(),
-      Private: p
+      Private: private
     },
     function (err, record) {
       if (err) {
@@ -298,7 +295,7 @@ function logTransaction(u, t, a, n, s, m, p) {
 }
 
 // log invoice on airtable
-function createInvoice(sender, recipient, amount, note) {
+let createInvoice = (sender, recipient, amount, note) => {
   return new Promise((resolve, reject) => {
     base('invoices').create(
       {
@@ -320,8 +317,9 @@ function createInvoice(sender, recipient, amount, note) {
 }
 
 // @bot give @zrl 100 --> Gives 100gp from my account to zrl's
+const givePattern = /give\s+<@([A-z|0-9]+)>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/i;
 controller.hears(
-  /give\s+<@([A-z|0-9]+)>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/i,
+  givePattern,
   'direct_mention,direct_message,bot_message',
   (bot, message) => {
     // console.log(message)
@@ -407,6 +405,7 @@ controller.hears(
     if (invRecord.fields['Paid']) {
       bot.replyInThread(message, "You've already paid this invoice!");
     }
+    
     var replyCallback = (text, wentThrough) => {
       bot.replyInThread(message, text);
       if (typeof invoiceReplies[id] == 'function' && wentThrough) {
