@@ -64,7 +64,7 @@ function setBalance(id, amount, user, cb = () => { }) {
               return;
             }
             console.log(`Balance for Record ${id} set to ${bal + amount}`);
-            cb(balance, record);
+            cb(bal + amount, record);
           }
         );
       })
