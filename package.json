@@ -1,11 +1,14 @@
 {
-  "scripts": {
-    "start": "node index.js"
-  },
-  "main": "index.js",
+  "name": "bank-bot",
+  "version": "0.0.1",
+  "description": "A banker bot for hack club",
+  "main": "index.ts",
+  "repository": "https://github.com/hackclub/bank-bot.git",
+  "author": "Rishi Kothari, Neel Redkar, Harrison Katz",
+  "license": "MIT",
   "dependencies": {
-    "botkit": "0.7.4",
-    "airtable": "0.5.9",
-    "botkit-storage-redis": "^1.1.0"
+    "@slack/bolt": "^2.0.1",
+    "@types/node": "^13.13.4",
+    "typescript": "^3.8.3"
   }
 }
