@@ -159,7 +159,7 @@ controller.hears(
     getBalance(target, balance => {
       var reply =
         user == target
-          ? `You have ${balance}gp in your account, hackalackers.`
+          ? `You have ${balance}gp in your account, hackalacker.`
           : `Ah yes, User <@${target}> (${target})—they have ${balance}gp.`;
       bot.replyInThread(message, reply);
     });
@@ -197,7 +197,7 @@ var invoice = async (
   bot.say({
     user: '@' + recipient,
     channel: '@' + recipient,
-    text: `Good morrow hackalackers. <@${sender}> has just sent you an invoice of ${amount}gp${replyNote}
+    text: `Good morrow hackalacker. <@${sender}> has just sent you an invoice of ${amount}gp${replyNote}
        Reply with "@banker pay ${invRecord.id}".`
   });
 };
@@ -250,7 +250,7 @@ var transfer = (
           bot.say({
             user: '@' + target,
             channel: '@' + target,
-            text: `Good morrow hackalackers. <@${user}> has just transferred ${amount}gp to your account${replyNote}`
+            text: `Good morrow hackalacker. <@${user}> has just transferred ${amount}gp to your account${replyNote}`
           });
 
           isPrivate = true;
@@ -515,7 +515,7 @@ controller.on('slash_command', (bot, message) => {
         getBalance(target, balance => {
           var reply =
             user == target
-              ? `Ah yes, <@${target}> (${target}). You have ${balance}gp in your account, hackalackers.`
+              ? `Ah yes, <@${target}> (${target}). You have ${balance}gp in your account, hackalacker.`
               : `Ah yes, <@${target}> (${target})—they have ${balance}gp.`;
           bot.replyPrivateDelayed(message, {
             blocks: [
