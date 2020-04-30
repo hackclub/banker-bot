@@ -517,7 +517,7 @@ controller.on('slash_command', (bot, message) => {
             user == target
               ? `Ah yes, <@${target}> (${target}). You have ${balance}gp in your account, sirrah.`
               : `Ah yes, <@${target}> (${target})—they have ${balance}gp.`;
-          bot.replyPublicDelayed(message, {
+          bot.replyPrivateDelayed(message, {
             blocks: [
               {
                 type: 'section',
