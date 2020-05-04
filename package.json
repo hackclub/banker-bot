@@ -9,6 +9,10 @@
   "dependencies": {
     "@slack/bolt": "^2.0.1",
     "@types/node": "^13.13.4",
+    "nodemon": "^2.0.3",
     "typescript": "^3.8.3"
+  },
+  "scripts": {
+    "start": "nodemon index.ts"
   }
 }
