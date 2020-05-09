@@ -1,5 +1,6 @@
-import { App } from "@slack/bolt";
+// import { createEventAdapter } from "@slack/events-api";
 import { environment } from './environment';
+import { App } from '@slack/bolt';
 
 const app = new App({
     signingSecret: environment["sign-secret"],
@@ -14,12 +15,16 @@ const app = new App({
     // Start your app
     await app.start(environment["port"]);
 
-    app.command("/give-test", async ({ command, ack, say }) => {
-        await ack();
-
-        await say(`${command.text}`).catch(e => console.log(e));
-
-        console.log(command.text.split(" "))
+    app.command("/give-test", async ({ command, ack, context, respond }) => {
+        // await giveCommand(command, say)
+        console.log(JSON.stringify(command, null, 2))
+        await ack()
+        await app.client.chat.postMessage({
+            text: command.text,
+            channel: command.channel_id,
+            as_user: true,
+            token: context.token
+        })
     })
 
     app.command("/balance-test", async ({ command, ack, say }) => {
