@@ -12,8 +12,10 @@ const balanceRequest = async (userId: string) => {
 }
 
 export const balanceCommand = async (req: SlashCommand, say: SayFn) => {
+    const { text, user_id } = req
+
     // the ge
-    const user: string = await parseBalance(req.text, req.user_id);
+    const user: string = await parseBalance(text, user_id);
 
     // Gets the request from the database.
     const balance: AxiosResponse<number> = (await balanceRequest(user)).data;
@@ -33,7 +35,7 @@ export const balanceCommand = async (req: SlashCommand, say: SayFn) => {
                     {
                         "type": "mrkdwn",
                         "text": `Requested by: <@${req.user_name}>`
-                    },
+                    }
                 ],
             }
         ]
