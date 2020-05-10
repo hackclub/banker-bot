@@ -31,12 +31,12 @@ const app = new App({
     app.command("/balance-test", async ({ command, ack, say }) => {
         await ack();
 
-        
+
         await balanceCommand(command, say)
     })
 
     app.command("/invoice-test", async ({ command, ack, say }) => {
-
+        
     })
 
     app.command("/slip", async ({ command, ack, say }) => {
