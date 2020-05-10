@@ -1,6 +1,7 @@
 // import { createEventAdapter } from "@slack/events-api";
 import { environment } from './environment';
 import { App } from '@slack/bolt';
+import { balanceCommand } from './src/balances/balanceSelf';
 
 const app = new App({
     signingSecret: environment["sign-secret"],
@@ -28,7 +29,10 @@ const app = new App({
     })
 
     app.command("/balance-test", async ({ command, ack, say }) => {
+        await ack();
 
+        
+        await balanceCommand(command, say)
     })
 
     app.command("/invoice-test", async ({ command, ack, say }) => {
