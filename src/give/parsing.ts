@@ -1,3 +1,6 @@
+/**
+ * An interface for the `/give` request response.
+ */
 interface GiveRequest {
     to: string,
     amount: number,
