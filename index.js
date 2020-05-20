@@ -407,20 +407,12 @@ controller.hears(
     if (invRecord.fields['Paid']) {
       bot.replyInThread(message, "You've already paid this invoice!");
     }
-    var replyCallback = (text, wentThrough) => {
-      bot.replyInThread(message, text);
-      if (typeof invoiceReplies[id] == 'function' && wentThrough) {
-        invoiceReplies[id](
-          `<@${user}> paid their invoice of ${amount} gp from <@${target}>${invRecord.fields['Reason']}`
-        );
-      }
-    };
     var amount = invRecord.fields['Amount'];
     var target = invRecord.fields['From'];
     var note = `for invoice ${invRecord.id}`;
-    var replyCallback = text => {
+    var replyCallback = (text, wentThrough) => {
       bot.replyInThread(message, text);
-      if (typeof invoiceReplies[id] == 'function') {
+      if (typeof invoiceReplies[id] == 'function' && wentThrough) {
         invoiceReplies[id](
           `<@${user}> paid their invoice of ${amount} gp from <@${target}>${invRecord.fields['Reason']}`
         );
