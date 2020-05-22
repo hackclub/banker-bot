@@ -462,7 +462,7 @@ controller.on('slash_command', (bot, message) => {
                                 type: 'section',
                                 text: {
                                     type: 'mrkdwn',
-                                    text: text
+                                    text: text.replace("@channel", "").replace("@everyone", "")
                                 }
                             },
                             {
