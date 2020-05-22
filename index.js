@@ -198,7 +198,7 @@ var invoice = async (
     user: '@' + recipient,
     channel: '@' + recipient,
     text: `Good morrow hackalacker. <@${sender}> has just sent you an invoice of ${amount}gp${replyNote}
-       Reply with "@banker pay ${invRecord.id}".`
+       Reply with "@banker pay ${invRecord.id}".`.replace("@channel","")
   });
 };
 
@@ -250,7 +250,7 @@ var transfer = (
           bot.say({
             user: '@' + target,
             channel: '@' + target,
-            text: `Good morrow hackalacker. <@${user}> has just transferred ${amount}gp to your account${replyNote}`
+            text: `Good morrow hackalacker. <@${user}> has just transferred ${amount}gp to your account${replyNote}`.replace("@channel","")
           });
 
           isPrivate = true;
@@ -259,7 +259,7 @@ var transfer = (
           bot.say({
             user: '@' + target,
             channel: '@' + target,
-            text: `$$$ | <@${user}> | ${amount} | ${replyNote} | ${channelid} | ${ts}`
+            text: `$$$ | <@${user}> | ${amount} | ${replyNote} | ${channelid} | ${ts}`.replace("@channel","")
           });
         }
 
@@ -338,7 +338,7 @@ controller.hears(
     var amount = message.match[2];
     var note = message.match[3] || '';
 
-    var replyCallback = text => bot.replyInThread(message, text);
+    var replyCallback = text => bot.replyInThread(message, text.replace("@channel",""));
 
     transfer(
       bot,
@@ -372,7 +372,7 @@ controller.hears(
     var amount = message.match[2];
     var note = message.match[3] || '';
 
-    var replyCallback = text => bot.replyInThread(message, text);
+    var replyCallback = text => bot.replyInThread(message, text.replace("@channel", ""));
     invoice(
       bot,
       event['channel_type'],
@@ -411,10 +411,10 @@ controller.hears(
     var target = invRecord.fields['From'];
     var note = `for invoice ${invRecord.id}`;
     var replyCallback = (text, wentThrough) => {
-      bot.replyInThread(message, text);
+      bot.replyInThread(message, text.replace("@channel",""));
       if (typeof invoiceReplies[id] == 'function' && wentThrough) {
         invoiceReplies[id](
-          `<@${user}> paid their invoice of ${amount} gp from <@${target}>${invRecord.fields['Reason']}`
+          `<@${user}> paid their invoice of ${amount} gp from <@${target}>${invRecord.fields['Reason']}`.replace("@channel","")
         );
       }
     };
@@ -470,7 +470,7 @@ controller.on('slash_command', (bot, message) => {
                 elements: [
                   {
                     type: 'mrkdwn',
-                    text: `Transferred by <@${user_id}>`
+                    text: `Transferred by <@${user_id}>`.replace("@channel","")
                   }
                 ]
               }
