@@ -137,7 +137,7 @@ var balancePattern = /^balance(?:\s+<@([A-z|0-9]+)>)?/i;
 controller.hears(
   balancePattern.source,
   'direct_mention,direct_message,bot_message',
-  (bot, message) => {
+  async (bot, message) => {
     var { text, user } = message;
     var captures = balancePattern.exec(text);
     var target = captures[1] || user;
@@ -319,7 +319,7 @@ function createInvoice(sender, recipient, amount, note) {
 controller.hears(
   /give\s+<@([A-z|0-9]+)>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/i,
   'direct_mention,direct_message,bot_message',
-  (bot, message) => {
+  async (bot, message) => {
     // console.log(message)
     var { text, user, event, ts, channel } = message;
 
@@ -364,7 +364,7 @@ controller.hears(
 controller.hears(
   /invoice\s+<@([A-z|0-9]+)>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/i,
   'direct_mention,direct_message,bot_message',
-  (bot, message) => {
+  async (bot, message) => {
     var { text, user, event, ts, channel } = message;
 
     const verifyResult = await verifyPayload(text);
