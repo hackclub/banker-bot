@@ -8,6 +8,7 @@
     "botkit": "0.7.4",
     "botkit-storage-redis": "^1.1.0",
     "bottleneck": "^2.19.5",
+    "dotenv": "^8.2.0",
     "node-fetch": "^2.6.0"
   }
 }

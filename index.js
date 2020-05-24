@@ -7,6 +7,7 @@ var fetch = require('node-fetch');
 
 var rawData = fs.readFileSync('data.json');
 var data = JSON.parse(rawData);
+require('dotenv').config()
 
 var base = new Airtable({
   apiKey: process.env.AIRTABLE_KEY,
