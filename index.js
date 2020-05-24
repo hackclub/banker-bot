@@ -548,7 +548,10 @@ controller.hears('.*', 'direct_mention,direct_message', (bot, message) => {
 });
 
 let verifyPayload = async (data) => {
-  const response = await fetch('https://slack.hosted.hackclub.com');
+  const response = await fetch('https://slack.hosted.hackclub.com', {
+    method: 'post',
+    body: data
+  });
   const responseData = await response.text();
   const status = await response.status;
 
