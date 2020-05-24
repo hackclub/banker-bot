@@ -438,100 +438,100 @@ controller.on('slash_command', async (bot, message) => {
   const verifyResult = await verifyPayload(text);
 
   if (verifyResult[0] != 204) {
-    return bot.replyPrivate(message, JSON.parse(verifyResult[1])['text']);
-  }
-
-  if (message.channel_id == process.env.SLACK_SELF_ID) {
-    bot.replyPublicDelayed(
-      message,
-      "Just fyi... You're talking to me already... no need for slash commands to summon me!"
-    );
+    bot.replyPrivateDelayed(message, JSON.parse(verifyResult[1])['text']);
   } else {
-    if (command == '/give') {
-      var pattern = /<@([A-z|0-9]+)\|.+>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/;
-      var match = pattern.exec(text);
-      if (match) {
-        var target = match[1];
-        var amount = match[2];
-        var note = match[3] || '';
-
-        var replyCallback = (text) =>
-          bot.replyPublicDelayed(message, {
-            blocks: [
-              {
-                type: 'section',
-                text: {
-                  type: 'mrkdwn',
-                  text: text,
-                },
-              },
-              {
-                type: 'context',
-                elements: [
-                  {
+    if (message.channel_id == process.env.SLACK_SELF_ID) {
+      bot.replyPublicDelayed(
+        message,
+        "Just fyi... You're talking to me already... no need for slash commands to summon me!"
+      );
+    } else {
+      if (command == '/give') {
+        var pattern = /<@([A-z|0-9]+)\|.+>\s+([0-9]+)(?:gp)?(?:\s+for\s+(.+))?/;
+        var match = pattern.exec(text);
+        if (match) {
+          var target = match[1];
+          var amount = match[2];
+          var note = match[3] || '';
+  
+          var replyCallback = (text) =>
+            bot.replyPublicDelayed(message, {
+              blocks: [
+                {
+                  type: 'section',
+                  text: {
                     type: 'mrkdwn',
-                    text: `Transferred by <@${user_id}>`,
+                    text: text,
                   },
-                ],
-              },
-            ],
-          });
-
-        transfer(
-          {
-            bot,
-            channelType: 'public',
-            user: user_id,
-            target,
-            amount,
-            note,
-            ts,
-            channel,
-          },
-          replyCallback
-        );
-      } else {
-        bot.replyPrivateDelayed(
-          message,
-          'I do not understand! Please type your message as `/give @user [positive-amount]gp for [reason]`'
-        );
+                },
+                {
+                  type: 'context',
+                  elements: [
+                    {
+                      type: 'mrkdwn',
+                      text: `Transferred by <@${user_id}>`,
+                    },
+                  ],
+                },
+              ],
+            });
+  
+          transfer(
+            {
+              bot,
+              channelType: 'public',
+              user: user_id,
+              target,
+              amount,
+              note,
+              ts,
+              channel,
+            },
+            replyCallback
+          );
+        } else {
+          bot.replyPrivateDelayed(
+            message,
+            'I do not understand! Please type your message as `/give @user [positive-amount]gp for [reason]`'
+          );
+        }
       }
-    }
-
-    if (command == '/balance') {
-      var pattern = /(?:<@([A-z|0-9]+)\|.+>)?/i;
-      var match = pattern.exec(text);
-      if (match) {
-        var target = match[1] || user;
-        console.log(
-          `Received balance request from User ${user} for User ${target}`
-        );
-        getBalance(target, (balance) => {
-          var reply =
-            user == target
-              ? `Ah yes, <@${target}> (${target}). You have ${balance}gp in your account, hackalacker.`
-              : `Ah yes, <@${target}> (${target})—they have ${balance}gp.`;
-          bot.replyPrivateDelayed(message, {
-            blocks: [
-              {
-                type: 'section',
-                text: {
-                  type: 'mrkdwn',
-                  text: reply,
-                },
-              },
-              {
-                type: 'context',
-                elements: [
-                  {
+  
+      if (command == '/balance') {
+        var pattern = /(?:<@([A-z|0-9]+)\|.+>)?/i;
+        var match = pattern.exec(text);
+        if (match) {
+          var target = match[1] || user;
+          console.log(
+            `Received balance request from User ${user} for User ${target}`
+          );
+          getBalance(target, (balance) => {
+            var reply =
+              user == target
+                ? `Ah yes, <@${target}> (${target}). You have ${balance}gp in your account, hackalacker.`
+                : `Ah yes, <@${target}> (${target})—they have ${balance}gp.`;
+            bot.replyPrivateDelayed(message, {
+              blocks: [
+                {
+                  type: 'section',
+                  text: {
                     type: 'mrkdwn',
-                    text: `Requested by <@${user}>`,
+                    text: reply,
                   },
-                ],
-              },
-            ],
+                },
+                {
+                  type: 'context',
+                  elements: [
+                    {
+                      type: 'mrkdwn',
+                      text: `Requested by <@${user}>`,
+                    },
+                  ],
+                },
+              ],
+            });
           });
-        });
+        }
       }
     }
   }
