@@ -438,7 +438,7 @@ controller.on('slash_command', async (bot, message) => {
   const verifyResult = await verifyPayload(text);
 
   if (verifyResult[0] != 204) {
-    return bot.replyEphemeral(message, JSON.parse(verifyResult[1])['text']);
+    return bot.replyPrivate(message, JSON.parse(verifyResult[1])['text']);
   }
 
   if (message.channel_id == process.env.SLACK_SELF_ID) {
