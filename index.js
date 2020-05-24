@@ -142,18 +142,24 @@ controller.hears(
     var captures = balancePattern.exec(text);
     var target = captures[1] || user;
 
-    console.log(
-      `Received balance request from User ${user} for User ${target}`
-    );
-    console.log(message);
-
-    getBalance(target, (balance) => {
-      var reply =
-        user == target
-          ? `You have ${balance}gp in your account, hackalacker.`
-          : `Ah yes, User <@${target}> (${target})—they have ${balance}gp.`;
-      bot.replyInThread(message, reply);
-    });
+    const verifyResult = await verifyPayload(text);
+    
+    if (verifyResult[0] != 204) {
+      bot.replyPrivateDelayed(message, JSON.parse(verifyResult[1])['text']);
+    } else {
+      console.log(
+        `Received balance request from User ${user} for User ${target}`
+      );
+      console.log(message);
+  
+      getBalance(target, (balance) => {
+        var reply =
+          user == target
+            ? `You have ${balance}gp in your account, hackalacker.`
+            : `Ah yes, User <@${target}> (${target})—they have ${balance}gp.`;
+        bot.replyInThread(message, reply);
+      });
+    }
   }
 );
 
@@ -316,33 +322,40 @@ controller.hears(
   (bot, message) => {
     // console.log(message)
     var { text, user, event, ts, channel } = message;
-    if (message.thread_ts) {
-      ts = message.thread_ts;
+
+    const verifyResult = await verifyPayload(text);
+    
+    if (verifyResult[0] != 204) {
+      bot.replyPrivateDelayed(message, JSON.parse(verifyResult[1])['text']);
+    } else {
+      if (message.thread_ts) {
+        ts = message.thread_ts;
+      }
+      if (message.type == 'bot_message' && !data.bots.includes(user)) return;
+  
+      console.log(`Processing give request from ${user}`);
+      console.log(message);
+  
+      var target = message.match[1];
+      var amount = message.match[2];
+      var note = message.match[3] || '';
+  
+      var replyCallback = (text) => bot.replyInThread(message, text);
+  
+      transfer(
+        {
+          bot,
+          channelType: event['channel_type'],
+          user,
+          target,
+          amount,
+          note,
+          ts,
+          channelid: channel,
+        },
+        replyCallback
+      );
     }
-    if (message.type == 'bot_message' && !data.bots.includes(user)) return;
-
-    console.log(`Processing give request from ${user}`);
-    console.log(message);
-
-    var target = message.match[1];
-    var amount = message.match[2];
-    var note = message.match[3] || '';
-
-    var replyCallback = (text) => bot.replyInThread(message, text);
-
-    transfer(
-      {
-        bot,
-        channelType: event['channel_type'],
-        user,
-        target,
-        amount,
-        note,
-        ts,
-        channelid: channel,
-      },
-      replyCallback
-    );
   }
 );
 
@@ -353,29 +366,36 @@ controller.hears(
   'direct_mention,direct_message,bot_message',
   (bot, message) => {
     var { text, user, event, ts, channel } = message;
-    if (message.thread_ts) {
-      ts = message.thread_ts;
+
+    const verifyResult = await verifyPayload(text);
+
+    if (verifyResult[0] != 204) {
+      bot.replyPrivateDelayed(message, JSON.parse(verifyResult[1])['text']);
+    } else {
+      if (message.thread_ts) {
+        ts = message.thread_ts;
+      }
+      if (message.type == 'bot_message' && !data.bots.includes(user)) return;
+  
+      console.log(`Processing invoice request from ${user}`);
+  
+      var target = message.match[1];
+      var amount = message.match[2];
+      var note = message.match[3] || '';
+  
+      var replyCallback = (text) => bot.replyInThread(message, text);
+      invoice(
+        bot,
+        event['channel_type'],
+        user,
+        target,
+        amount,
+        note,
+        replyCallback,
+        ts,
+        channel
+      );
     }
-    if (message.type == 'bot_message' && !data.bots.includes(user)) return;
-
-    console.log(`Processing invoice request from ${user}`);
-
-    var target = message.match[1];
-    var amount = message.match[2];
-    var note = message.match[3] || '';
-
-    var replyCallback = (text) => bot.replyInThread(message, text);
-    invoice(
-      bot,
-      event['channel_type'],
-      user,
-      target,
-      amount,
-      note,
-      replyCallback,
-      ts,
-      channel
-    );
   }
 );
 
