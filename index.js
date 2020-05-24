@@ -427,7 +427,7 @@ controller.hears(
   }
 );
 
-controller.on('slash_command', (bot, message) => {
+controller.on('slash_command', async (bot, message) => {
   var { command, text, user_id, ts, channel } = message;
   var user = user_id;
   console.log(`Slash command received from ${user_id}: ${text}`);
