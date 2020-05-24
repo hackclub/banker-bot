@@ -435,7 +435,7 @@ controller.on('slash_command', async (bot, message) => {
 
   bot.replyAcknowledge();
 
-  const verifyResult = await verifyPayload();
+  const verifyResult = await verifyPayload(text);
 
   if (verifyResult[0] != 204) {
     return bot.replyEphemeral(message, JSON.parse(verifyResult[1])['text']);
