@@ -438,7 +438,7 @@ controller.on('slash_command', async (bot, message) => {
   const verifyResult = await verifyPayload();
 
   if (verifyResult[0] != 204) {
-    return bot.replyEphemeral(message, verifyResult[1]['text']);
+    return bot.replyEphemeral(message, JSON.parse(verifyResult[1])['text']);
   }
 
   if (message.channel_id == process.env.SLACK_SELF_ID) {
@@ -549,10 +549,10 @@ controller.hears('.*', 'direct_mention,direct_message', (bot, message) => {
 
 let verifyPayload = async (data) => {
   const response = await fetch('https://slack.hosted.hackclub.com');
-  const responseData = await response.json();
+  const responseData = await response.text();
   const status = await response.status;
 
-  console.log("Data: " + JSON.stringify(data));
+  console.log("Data: " + responseData);
   console.log("Status: " + status)
 
   return [status, responseData];
