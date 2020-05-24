@@ -1,12 +1,11 @@
 var Botkit = require('botkit');
 var Airtable = require('airtable');
+var Bottleneck = require('bottleneck')
 var _ = require('lodash');
 var fs = require('fs');
 
 var rawData = fs.readFileSync('data.json');
 var data = JSON.parse(rawData);
-var globalChanges = false;
-var arrayIntervals = []
 
 var base = new Airtable({
   apiKey: process.env.AIRTABLE_KEY
@@ -45,31 +44,22 @@ function createBalance(user, cb = () => { }) {
 
 function setBalance(id, amount, user, cb = () => { }) {
   console.log(`Changing balance for Record ${id} by ${amount}`);
-  arrayIntervals.push(setInterval(() => {
-    console.log(`Global variable is ${globalChanges}`)
-    if (!globalChanges) {
-      globalChanges = true;
-      getBalance(user, bal => {
-        base('bank').update(
-          id,
-          {
-            Balance: bal + amount,
-          },
-          (err, record) => {
-            clearInterval(arrayIntervals[0])
-            arrayIntervals.shift()
-            globalChanges = false
-            if (err) {
-              console.error(err);
-              return;
-            }
-            console.log(`Balance for Record ${id} set to ${bal + amount}`);
-            cb(bal + amount, record);
-          }
-        );
-      })
-    }
-  }, 1000))
+  getBalance(user, bal => {
+    base('bank').update(
+      id,
+      {
+        Balance: bal + amount,
+      },
+      (err, record) => {
+        if (err) {
+          console.error(err);
+          return;
+        }
+        console.log(`Balance for Record ${id} set to ${bal + amount}`);
+        cb(bal + amount, record);
+      }
+    );
+  })
 }
 
 function getBalance(user, cb = () => { }) {
@@ -202,17 +192,22 @@ var invoice = async (
   });
 };
 
-var transfer = (
+var txLimiter = new Bottleneck({
+  maxConcurrent: 1
+})
+
+var transfer = (args, cb) => txLimiter.submit(transferJob, args, cb)
+
+var transferJob = ({
   bot,
   channelType,
   user,
   target,
   amount,
   note,
-  replyCallback,
   ts,
   channelid
-) => {
+}, replyCallback) => {
   if (user == target) {
     console.log(`${user} attempting to transfer to theirself`);
     replyCallback(`What are you trying to pull here, <@${user}>?`);
@@ -341,15 +336,17 @@ controller.hears(
     var replyCallback = text => bot.replyInThread(message, text);
 
     transfer(
-      bot,
-      event['channel_type'],
-      user,
-      target,
-      amount,
-      note,
+      {
+        bot,
+        channelType: event['channel_type'],
+        user,
+        target,
+        amount,
+        note,
+        ts,
+        channelid: channel,
+      },
       replyCallback,
-      ts,
-      channel
     );
   }
 );
@@ -420,15 +417,17 @@ controller.hears(
     };
 
     transfer(
-      bot,
-      channel.type,
-      user,
-      target,
-      amount,
-      note,
+      {
+        bot,
+        channelType: channel.type,
+        user,
+        target,
+        amount,
+        note,
+        ts,
+        channelid: channel
+      },
       replyCallback,
-      ts,
-      channel
     );
   }
 );
@@ -478,15 +477,17 @@ controller.on('slash_command', (bot, message) => {
           });
 
         transfer(
-          bot,
-          'public',
-          user_id,
-          target,
-          amount,
-          note,
+          {
+            bot,
+            channelType: 'public',
+            user: user_id,
+            target,
+            amount,
+            note,
+            ts,
+            channel,
+          },
           replyCallback,
-          ts,
-          channel
         );
       } else {
         bot.replyPrivateDelayed(
