@@ -407,48 +407,46 @@ controller.hears(
   async (bot, message) => {
     var { text, user, event, ts, channel } = message;
 
-    if (verifyResult[0] != 204) {
-      bot.replyInThread(message, JSON.parse(verifyResult[1])['text']);
-    } else {
-      if (message.thread_ts) {
-        ts = message.thread_ts;
-      }
-      if (message.type == 'bot_message' && !data.bots.includes(user)) return;
-  
-      console.log(`Processing invoice payment from ${user}`);
-  
-      var id = message.match[1];
-      var invRecord = await getInvoice(id);
-  
-      if (invRecord.fields['Paid']) {
-        bot.replyInThread(message, "You've already paid this invoice!");
-      }
-      var amount = invRecord.fields['Amount'];
-      var target = invRecord.fields['From'];
-      var note = `for invoice ${invRecord.id}`;
-      var replyCallback = (text, wentThrough) => {
-        bot.replyInThread(message, text);
-        if (typeof invoiceReplies[id] == 'function' && wentThrough) {
-          invoiceReplies[id](
-            `<@${user}> paid their invoice of ${amount} gp from <@${target}>${invRecord.fields['Reason']}`
-          );
-        }
-      };
-  
-      transfer(
-        {
-          bot,
-          channelType: channel.type,
-          user,
-          target,
-          amount,
-          note,
-          ts,
-          channelid: channel,
-        },
-        replyCallback
-      );
+    const verifyResult = await verifyPayload(text);
+
+    if (message.thread_ts) {
+      ts = message.thread_ts;
     }
+    if (message.type == 'bot_message' && !data.bots.includes(user)) return;
+
+    console.log(`Processing invoice payment from ${user}`);
+
+    var id = message.match[1];
+    var invRecord = await getInvoice(id);
+
+    if (invRecord.fields['Paid']) {
+      bot.replyInThread(message, "You've already paid this invoice!");
+    }
+    var amount = invRecord.fields['Amount'];
+    var target = invRecord.fields['From'];
+    var note = `for invoice ${invRecord.id}`;
+    var replyCallback = (text, wentThrough) => {
+      bot.replyInThread(message, text);
+      if (typeof invoiceReplies[id] == 'function' && wentThrough) {
+        invoiceReplies[id](
+          `<@${user}> paid their invoice of ${amount} gp from <@${target}>${invRecord.fields['Reason']}`
+        );
+      }
+    };
+
+    transfer(
+      {
+        bot,
+        channelType: channel.type,
+        user,
+        target,
+        amount,
+        note,
+        ts,
+        channelid: channel,
+      },
+      replyCallback
+    );
   }
 );
 
