@@ -1,9 +1,5 @@
 # Banker
 
-2020-08-18: Banker bot is no longer being maintained, supported, or developed.
-
-***
-
 *The Banker presents himself with a bow. He overdoes it a little.*
 
 Good Morrow Hackalacker,
