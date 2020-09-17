@@ -180,6 +180,13 @@ var invoice = async (
 
     return;
   }
+  
+  if (amount === 0) {
+    console.log(`${sender} attempting to send 0gp`);
+    replyCallback(`no`);
+
+    return;
+  }
 
   var replyNote = note ? ` for "${note}".` : '.';
 
