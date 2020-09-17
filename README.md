@@ -1,6 +1,6 @@
 <p align="center"><i>The Banker presents himself with a bow. He overdoes it a little.</i></p>
 
-<p align="center"><img src="https://media.giphy.com/media/RkbIp7Tax73au4n65S/giphy.gif"></a>
+<p align="center"><img src="https://cloud-n5n8k0ngz.vercel.app/giphy.gif"></a>
 
 Good Morrow Hackalacker,
 
