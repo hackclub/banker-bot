@@ -142,16 +142,16 @@ controller.hears(
     var captures = balancePattern.exec(text);
     var target = captures[1] || user;
 
-    const verifyResult = await verifyPayload(text);
-    
-    if (verifyResult[0] != 204) {
-      bot.replyInThread(message, JSON.parse(verifyResult[1])['text']);
+    const { verifiedStatus, verifiedText } = await verifyPayload(text);
+
+    if (verifiedStatus != 204) {
+      bot.replyInThread(message, verifiedText);
     } else {
       console.log(
         `Received balance request from User ${user} for User ${target}`
       );
       console.log(message);
-  
+
       getBalance(target, (balance) => {
         var reply =
           user == target
@@ -330,25 +330,25 @@ controller.hears(
     // console.log(message)
     var { text, user, event, ts, channel } = message;
 
-    const verifyResult = await verifyPayload(text);
-    
-    if (verifyResult[0] != 204) {
-      bot.replyInThread(message, JSON.parse(verifyResult[1])['text']);
+    const { verifiedText, verifiedStatus } = await verifyPayload(text);
+
+    if (verifiedStatus) {
+      bot.replyInThread(message, verifiedText);
     } else {
       if (message.thread_ts) {
         ts = message.thread_ts;
       }
       if (message.type == 'bot_message' && !data.bots.includes(user)) return;
-  
+
       console.log(`Processing give request from ${user}`);
       console.log(message);
-  
+
       var target = message.match[1];
       var amount = message.match[2];
       var note = message.match[3] || '';
-  
+
       var replyCallback = (text) => bot.replyInThread(message, text);
-  
+
       transfer(
         {
           bot,
@@ -374,22 +374,22 @@ controller.hears(
   async (bot, message) => {
     var { text, user, event, ts, channel } = message;
 
-    const verifyResult = await verifyPayload(text);
+    const { verifiedStatus, verifiedText } = await verifyPayload(text);
 
-    if (verifyResult[0] != 204) {
-      bot.replyInThread(message, JSON.parse(verifyResult[1])['text']);
+    if (verifiedStatus != 204) {
+      bot.replyInThread(message, verifiedText);
     } else {
       if (message.thread_ts) {
         ts = message.thread_ts;
       }
       if (message.type == 'bot_message' && !data.bots.includes(user)) return;
-  
+
       console.log(`Processing invoice request from ${user}`);
-  
+
       var target = message.match[1];
       var amount = message.match[2];
       var note = message.match[3] || '';
-  
+
       var replyCallback = (text) => bot.replyInThread(message, text);
       invoice(
         bot,
@@ -465,10 +465,10 @@ controller.on('slash_command', async (bot, message) => {
 
   bot.replyAcknowledge();
 
-  const verifyResult = await verifyPayload(text);
+  const { verifiedText, verifiedStatus } = await verifyPayload(text);
 
-  if (verifyResult[0] != 204) {
-    bot.replyPrivateDelayed(message, JSON.parse(verifyResult[1])['text']);
+  if (verifiedStatus != 204) {
+    bot.replyPrivateDelayed(message, verifiedText);
   } else {
     if (message.channel_id == process.env.SLACK_SELF_ID) {
       bot.replyPublicDelayed(
@@ -483,7 +483,7 @@ controller.on('slash_command', async (bot, message) => {
           var target = match[1];
           var amount = match[2];
           var note = match[3] || '';
-  
+
           var replyCallback = (text) =>
             bot.replyPublicDelayed(message, {
               blocks: [
@@ -505,7 +505,7 @@ controller.on('slash_command', async (bot, message) => {
                 },
               ],
             });
-  
+
           transfer(
             {
               bot,
@@ -526,7 +526,7 @@ controller.on('slash_command', async (bot, message) => {
           );
         }
       }
-  
+
       if (command == '/balance') {
         var pattern = /(?:<@([A-z|0-9]+)\|.+>)?/i;
         var match = pattern.exec(text);
@@ -578,15 +578,13 @@ controller.hears('.*', 'direct_mention,direct_message', (bot, message) => {
 });
 
 let verifyPayload = async (data) => {
+  // See https://github.com/hkatzdev/restricted-slack-api
   const response = await fetch('https://slack.hosted.hackclub.com', {
     method: 'post',
-    body: data
+    body: data,
   });
-  const responseData = await response.text();
-  const status = await response.status;
+  const verifiedText = await response.json();
+  const verifiedStatus = response.status;
 
-  console.log("Data: " + responseData);
-  console.log("Status: " + status)
-
-  return [status, responseData];
+  return { verifiedText, verifiedStatus };
 };
