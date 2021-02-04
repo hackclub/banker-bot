@@ -277,14 +277,14 @@ var transferJob = (
           if (data[target].hook != undefined) {
             fetch(data[target].hook, {
               method: 'post',
-              body: {
+              body: JSON.stringify({
                 user,
                 amount,
                 replyNote,
                 channelid,
                 ts,
                 secret: data[target].secret
-              }
+              })
             });
           }
         }
