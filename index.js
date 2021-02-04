@@ -5,12 +5,20 @@ var _ = require('lodash');
 var fs = require('fs');
 var fetch = require('node-fetch');
 
-var rawData = fs.readFileSync('data.json');
-var data = JSON.parse(rawData);
-
 var base = new Airtable({
   apiKey: process.env.AIRTABLE_KEY,
 }).base(process.env.AIRTABLE_BASE);
+
+var data = {};
+
+base("api").select().all().then(records => {
+  records.forEach(record => {
+    data[record.fields.ID] = {
+      secret: record.fields.Token,
+      hook: record.fields.Webhook
+    }
+  })
+})
 
 var redisConfig = {
   url: process.env.REDISCLOUD_URL,
@@ -23,7 +31,7 @@ var invoiceReplies = {};
 
 console.log('Booting bank bot');
 
-function createBalance(user, cb = () => {}) {
+function createBalance(user, cb = () => { }) {
   console.log(`Creating balance for User ${user}`);
 
   base('bank').create(
@@ -43,7 +51,7 @@ function createBalance(user, cb = () => {}) {
   );
 }
 
-function setBalance(id, amount, user, cb = () => {}) {
+function setBalance(id, amount, user, cb = () => { }) {
   console.log(`Changing balance for Record ${id} by ${amount}`);
   getBalance(user, (bal) => {
     base('bank').update(
@@ -63,7 +71,7 @@ function setBalance(id, amount, user, cb = () => {}) {
   });
 }
 
-function getBalance(user, cb = () => {}) {
+function getBalance(user, cb = () => { }) {
   console.log(`Retrieving balance for User ${user}`);
 
   base('bank')
@@ -143,7 +151,7 @@ controller.hears(
     var target = captures[1] || user;
 
     const verifyResult = await verifyPayload(text);
-    
+
     if (verifyResult[0] != 204) {
       bot.replyInThread(message, JSON.parse(verifyResult[1])['text']);
     } else {
@@ -151,7 +159,7 @@ controller.hears(
         `Received balance request from User ${user} for User ${target}`
       );
       console.log(message);
-  
+
       getBalance(target, (balance) => {
         var reply =
           user == target
@@ -180,7 +188,7 @@ var invoice = async (
 
     return;
   }
-  
+
   if (amount === 0) {
     console.log(`${sender} attempting to send 0gp`);
     replyCallback(`no`);
@@ -243,7 +251,7 @@ var transferJob = (
 
         replyCallback(
           `I shall transfer ${amount}gp to <@${target}> immediately` +
-            replyNote,
+          replyNote,
           true
         );
 
@@ -257,13 +265,28 @@ var transferJob = (
           });
 
           isPrivate = true;
-        } else if (data.bots.includes(target)) {
+        } else if (Object.keys(data).includes(target)) {
           // send clean, splittable data string
           bot.say({
             user: '@' + target,
             channel: '@' + target,
             text: `$$$ | <@${user}> | ${amount} | ${replyNote} | ${channelid} | ${ts}`,
           });
+
+          //webhook
+          if (data[target].hook != undefined) {
+            fetch(data[target].hook, {
+              method: 'post',
+              body: {
+                user,
+                amount,
+                replyNote,
+                channelid,
+                ts,
+                secret: data[target].secret
+              }
+            });
+          }
         }
 
         logTransaction(user, target, amount, note, true, '', isPrivate);
@@ -331,7 +354,7 @@ controller.hears(
     var { text, user, event, ts, channel } = message;
 
     const verifyResult = await verifyPayload(text);
-    
+
     if (verifyResult[0] != 204) {
       bot.replyInThread(message, JSON.parse(verifyResult[1])['text']);
     } else {
@@ -339,16 +362,16 @@ controller.hears(
         ts = message.thread_ts;
       }
       if (message.type == 'bot_message' && !data.bots.includes(user)) return;
-  
+
       console.log(`Processing give request from ${user}`);
       console.log(message);
-  
+
       var target = message.match[1];
       var amount = message.match[2];
       var note = message.match[3] || '';
-  
+
       var replyCallback = (text) => bot.replyInThread(message, text);
-  
+
       transfer(
         {
           bot,
@@ -383,13 +406,13 @@ controller.hears(
         ts = message.thread_ts;
       }
       if (message.type == 'bot_message' && !data.bots.includes(user)) return;
-  
+
       console.log(`Processing invoice request from ${user}`);
-  
+
       var target = message.match[1];
       var amount = message.match[2];
       var note = message.match[3] || '';
-  
+
       var replyCallback = (text) => bot.replyInThread(message, text);
       invoice(
         bot,
@@ -483,7 +506,7 @@ controller.on('slash_command', async (bot, message) => {
           var target = match[1];
           var amount = match[2];
           var note = match[3] || '';
-  
+
           var replyCallback = (text) =>
             bot.replyPublicDelayed(message, {
               blocks: [
@@ -505,7 +528,7 @@ controller.on('slash_command', async (bot, message) => {
                 },
               ],
             });
-  
+
           transfer(
             {
               bot,
@@ -526,7 +549,7 @@ controller.on('slash_command', async (bot, message) => {
           );
         }
       }
-  
+
       if (command == '/balance') {
         var pattern = /(?:<@([A-z|0-9]+)\|.+>)?/i;
         var match = pattern.exec(text);
