@@ -249,7 +249,14 @@ var transferJob = (
 
         var isPrivate = false;
 
-        if (channelType == 'im') {
+        if (data.bots.includes(target)) {
+          // send clean, splittable data string
+          bot.say({
+            user: '@' + target,
+            channel: '@' + target,
+            text: `$$$ | <@${user}> | ${amount} | ${replyNote} | ${channelid} | ${ts}`,
+          });
+        } else if (channelType == 'im') {
           bot.say({
             user: '@' + target,
             channel: '@' + target,
@@ -257,14 +264,7 @@ var transferJob = (
           });
 
           isPrivate = true;
-        } else if (data.bots.includes(target)) {
-          // send clean, splittable data string
-          bot.say({
-            user: '@' + target,
-            channel: '@' + target,
-            text: `$$$ | <@${user}> | ${amount} | ${replyNote} | ${channelid} | ${ts}`,
-          });
-        }
+        } 
 
         logTransaction(user, target, amount, note, true, '', isPrivate);
       });
