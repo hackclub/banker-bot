@@ -257,23 +257,15 @@ var transferJob = (
 
         var isPrivate = false;
 
-        if (channelType == 'im') {
-          bot.say({
-            user: '@' + target,
-            channel: '@' + target,
-            text: `Good morrow hackalacker. <@${user}> has just transferred ${amount}gp to your account${replyNote}`,
-          });
-
-          isPrivate = true;
-        } else if (Object.keys(data).includes(target)) {
+        if (data.bots.includes(target)) {
           // send clean, splittable data string
           bot.say({
             user: '@' + target,
             channel: '@' + target,
             text: `$$$ | <@${user}> | ${amount} | ${replyNote} | ${channelid} | ${ts}`,
           });
-
-          //webhook
+          
+           //webhook
           if (data[target].hook != undefined) {
             fetch(data[target].hook, {
               method: 'post',
@@ -288,6 +280,15 @@ var transferJob = (
             });
           }
         }
+        } else if (channelType == 'im') {
+          bot.say({
+            user: '@' + target,
+            channel: '@' + target,
+            text: `Good morrow hackalacker. <@${user}> has just transferred ${amount}gp to your account${replyNote}`,
+          });
+
+          isPrivate = true;
+        } 
 
         logTransaction(user, target, amount, note, true, '', isPrivate);
       });
