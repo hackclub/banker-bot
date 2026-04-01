@@ -4,8 +4,8 @@
   },
   "main": "index.js",
   "dependencies": {
-    "airtable": "0.7.2",
-    "botkit": "0.7.4",
+    "airtable": "0.12.2",
+    "botkit": "4.15.0",
     "botkit-storage-redis": "^1.1.0",
     "bottleneck": "^2.19.5",
     "node-fetch": "2.6.0"
